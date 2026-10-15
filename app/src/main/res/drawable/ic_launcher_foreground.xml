@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Subtle soft shadow -->
+    <path
+        android:pathData="M38,72 C32,72 26,67 26,61 C26,55.5 30,51 35.5,50.2 C37.8,41 46,34 56,34 C66.5,34 75,41.5 76.5,51.5 C81.5,52.5 85,56.5 85,61.5 C85,67.5 80,72 74,72 Z"
+        android:fillColor="#20000000" />
+
+    <!-- Radiant Sun Disk positioned behind cloud top-right -->
+    <path
+        android:pathData="M66,42 C66,33.16 58.84,26 50,26 C47.5,26 45.1,26.6 43,27.6 C46.8,32 52,36 58.5,37.5 C60.2,40.5 61.2,44 61.5,47.8 C64.3,46.3 66,44.3 66,42 Z"
+        android:fillColor="#FBBF24" />
+
+    <!-- Sun rays accent -->
+    <path
+        android:pathData="M64,28 L69,24 M73,36 L79,34 M56,22 L56,16"
+        android:strokeWidth="3.2"
+        android:strokeColor="#F59E0B"
+        android:strokeLineCap="round" />
+
+    <!-- Luminous Cloud Body -->
+    <path
+        android:pathData="M37,68 C31.5,68 27,63.5 27,58 C27,52.9 30.7,48.7 35.6,48.1 C38.2,39.5 46.1,33 55.5,33 C65.5,33 73.8,40.2 75.1,49.8 C79.8,50.7 83,54.7 83,59.5 C83,64.7 78.7,68 73.5,68 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="40"
+                android:startY="33"
+                android:endX="70"
+                android:endY="68"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFFFFF" />
+                <item android:offset="0.6" android:color="#E0F2FE" />
+                <item android:offset="1.0" android:color="#BAE6FD" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Flowing Rain droplets / WeatherFlow motion accent -->
+    <path
+        android:pathData="M40,74 C40,74 38,79 38,81 C38,82.5 39.2,84 41,84 C42.8,84 44,82.5 44,81 C44,79 40,74 40,74 Z"
+        android:fillColor="#38BDF8" />
+    <path
+        android:pathData="M54,74 C54,74 52,79 52,81 C52,82.5 53.2,84 55,84 C56.8,84 58,82.5 58,81 C58,79 54,74 54,74 Z"
+        android:fillColor="#38BDF8" />
+    <path
+        android:pathData="M68,74 C68,74 66,79 66,81 C66,82.5 67.2,84 69,84 C70.8,84 72,82.5 72,81 C72,79 68,74 68,74 Z"
+        android:fillColor="#38BDF8" />
+</vector>

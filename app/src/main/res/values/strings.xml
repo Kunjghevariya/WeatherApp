@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">WeatherFlow</string>
+    <string name="widget_description">Atmospheric live forecast matrix with temperatures, radar, and dynamics</string>
+    <string name="widget_quick_description">Compact capsule with current temperature and condition glance</string>
+    <string name="widget_pill_description">Horizontal bar with city, high/low, temperature, and precipitation</string>
+    <string name="notification_channel_briefing">Daily Weather Briefing</string>
+    <string name="notification_channel_rain">Precipitation &amp; Rain Alerts</string>
+    <string name="notification_channel_severe">Severe Weather Warnings</string>
+</resources>

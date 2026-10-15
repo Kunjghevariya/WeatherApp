@@ -1,0 +1,6 @@
+{
+  "name": "WeatherFlow",
+  "description": "A global weather companion with living sky visuals, trustworthy rain windows, activity planner, and region-aware safety alerts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
