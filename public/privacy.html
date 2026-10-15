@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - WeatherFlow | O Square Apps</title>
+  <meta name="description" content="Official Privacy Policy for WeatherFlow: Live Weather & AQI (com.osquareapps.weather) by O Square Apps. Learn how we safeguard your location and meteorological data.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070D1E;
+      --card-bg: rgba(19, 34, 56, 0.7);
+      --card-border: rgba(56, 189, 248, 0.15);
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --accent: #38BDF8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --primary: #0284C7;
+      --green: #10B981;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding-bottom: 60px;
+    }
+    header {
+      background: rgba(11, 19, 37, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 24px;
+    }
+    .header-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #38BDF8, #0284C7);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    nav a:hover, nav a.active {
+      color: var(--accent);
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #FFFFFF 40%, #38BDF8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .meta-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    p {
+      color: #CBD5E1;
+      margin-bottom: 14px;
+      font-size: 0.98rem;
+    }
+    ul {
+      margin-left: 20px;
+      margin-bottom: 14px;
+      color: #CBD5E1;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    strong {
+      color: #FFFFFF;
+    }
+    .highlight-box {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 4px solid var(--accent);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 18px 0;
+    }
+    .highlight-box p {
+      margin-bottom: 0;
+      color: #E2E8F0;
+    }
+    footer {
+      max-width: 900px;
+      margin: 60px auto 0;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--card-border);
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="brand">
+        <div class="brand-logo">🌤️</div>
+        <span>WeatherFlow</span>
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="how-to-use.html">How to Use</a>
+        <a href="privacy.html" class="active">Privacy Policy</a>
+        <a href="app-ads.txt" target="_blank">app-ads.txt</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="badge">🛡️ Google Play &amp; GDPR Compliant</div>
+    <h1>Privacy Policy</h1>
+    <div class="meta-text">
+      <strong>Application:</strong> WeatherFlow: Live Weather &amp; AQI<br>
+      <strong>Package Name:</strong> <code>com.osquareapps.weather</code><br>
+      <strong>Developer:</strong> O Square Apps<br>
+      <strong>Effective Date:</strong> October 15, 2026 &bull; <strong>Last Updated:</strong> October 15, 2026
+    </div>
+
+    <div class="card">
+      <h2>1. Introduction &amp; Commitment to Privacy</h2>
+      <p>O Square Apps ("we", "us", or "our") builds mobile experiences founded on user trust, privacy, and scientific transparency. This Privacy Policy governs your use of <strong>WeatherFlow: Live Weather &amp; AQI</strong> (the "Application" or "App").</p>
+      <p>We believe meteorological intelligence should never cost your personal privacy. We do not require you to create an account, log in, or provide personal identifiers (such as your name, email, phone number, or contacts) to use the App.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. Location Data &amp; Coordinate Precision Safeguards</h2>
+      <p>To deliver real-time atmospheric readings, precipitation alerts, and local solar/lunar ephemeris, WeatherFlow requires access to your device's geographical position:</p>
+      <ul>
+        <li><strong>Foreground Location (ACCESS_COARSE_LOCATION / ACCESS_FINE_LOCATION):</strong> Used when the app is active to automatically identify your local weather station, air quality index, and rain planner.</li>
+        <li><strong>Background Updates (Optional for Widgets &amp; Alerts):</strong> Used periodically via Android WorkManager solely to refresh active home screen widgets and dispatch timely severe storm warnings.</li>
+      </ul>
+      <div class="highlight-box">
+        <p><strong>🔒 4-Decimal Coordinate Truncation (~11m Precision):</strong> Before any geographic coordinate leaves your device to query atmospheric APIs, our engine strictly truncates latitude and longitude to exactly four decimal places. This ensures high meteorological accuracy without ever exposing your exact residential or street address.</p>
+      </div>
+      <p>We <strong>never</strong> record, log, or sell your location history. Location coordinates are strictly processed in-memory and cached locally on your device.</p>
+    </div>
+
+    <div class="card">
+      <h2>3. Meteorological &amp; Third-Party Services</h2>
+      <p>WeatherFlow accesses public meteorological and telemetry providers to provide live weather predictions:</p>
+      <ul>
+        <li><strong>MET Norway (Meteorologisk Institutt):</strong> Primary atmospheric and precipitation forecasts are fetched from MET Norway's Locationforecast 2.0 API under Creative Commons Attribution 4.0 International (CC BY 4.0). Requests are transmitted over encrypted TLS.</li>
+        <li><strong>Open-Meteo Air Quality &amp; CAMS:</strong> Atmospheric pollutant measurements (PM2.5, PM10, O₃, NO₂, CO) are fetched from Open-Meteo leveraging the European Copernicus Atmosphere Monitoring Service (CAMS) and NOAA models.</li>
+        <li><strong>Google Firebase Analytics (Google LLC):</strong> We collect aggregated, non-personalized operational metrics (such as crash telemetry, app cold start latency, and feature usage) to detect bugs and optimize performance. No advertising ID (AAID) is used to link your identity.</li>
+        <li><strong>Google AdMob (Google LLC):</strong> To keep WeatherFlow accessible, non-intrusive banner or interstitial advertisements may be served in accordance with Google Play policies and IAB Tech Lab <code>app-ads.txt</code> specifications (Publisher ID: <code>pub-7787849898368360</code>).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>4. Local Storage &amp; Data Retention</h2>
+      <p>All user-configured preferences—including saved cities, thermal comfort limits, active temperature scales (°C/°F), and widget appearance configurations—are stored locally on your device in an encrypted Room SQLite database and DataStore preferences.</p>
+      <p>You may purge all cached forecasts and saved places at any time by selecting "Clear Data / Storage" in your device's Android Application Settings.</p>
+    </div>
+
+    <div class="card">
+      <h2>5. Google Play Data Safety Disclosures</h2>
+      <ul>
+        <li><strong>Location:</strong> Approximate and Precise Location collected for App Functionality, Personalization, and Widget Updates. Encrypted in transit. Not shared with third-party data brokers.</li>
+        <li><strong>App Info and Performance:</strong> Crash logs and diagnostic metrics collected via Firebase for stability analysis.</li>
+        <li><strong>Device or other IDs:</strong> Ephemeral Firebase installation tokens used strictly for analytics and crash prevention.</li>
+        <li><strong>Data Sale:</strong> We <strong>never</strong> sell your personal or device data.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>6. Children's Privacy</h2>
+      <p>WeatherFlow complies with COPPA (Children's Online Privacy Protection Act) and does not knowingly collect personal information from children under the age of 13. If you believe any minor has provided us with personal information, please contact us immediately.</p>
+    </div>
+
+    <div class="card">
+      <h2>7. Contact &amp; Support</h2>
+      <p>If you have questions, feedback, or data privacy requests regarding WeatherFlow or O Square Apps, please contact us:</p>
+      <ul>
+        <li><strong>Developer:</strong> O Square Apps</li>
+        <li><strong>Official Website:</strong> <a href="https://weatherflow-3f663.web.app/">https://weatherflow-3f663.web.app/</a></li>
+        <li><strong>Support Email:</strong> <a href="mailto:support@osquareapps.com">support@osquareapps.com</a></li>
+        <li><strong>Publisher Ad Verification:</strong> <a href="app-ads.txt">https://weatherflow-3f663.web.app/app-ads.txt</a></li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 O Square Apps. All rights reserved. &bull; <a href="how-to-use.html">How to Use Guide</a> &bull; <a href="app-ads.txt">app-ads.txt</a></p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Use WeatherFlow - User Guide &amp; Feature Manual</title>
+  <meta name="description" content="Complete step-by-step user guide for WeatherFlow: Live Weather & AQI (com.osquareapps.weather). Learn how to configure widgets, read real-time air quality, and customize rain alerts.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070D1E;
+      --card-bg: rgba(19, 34, 56, 0.75);
+      --card-border: rgba(56, 189, 248, 0.15);
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --accent: #38BDF8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --primary: #0284C7;
+      --green: #10B981;
+      --amber: #F59E0B;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding-bottom: 60px;
+    }
+    header {
+      background: rgba(11, 19, 37, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 24px;
+    }
+    .header-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #38BDF8, #0284C7);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    nav a:hover, nav a.active {
+      color: var(--accent);
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #FFFFFF 40%, #38BDF8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .meta-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #070D1E;
+      font-weight: 800;
+      font-size: 0.85rem;
+      margin-right: 8px;
+    }
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+    }
+    p {
+      color: #CBD5E1;
+      margin-bottom: 14px;
+      font-size: 0.98rem;
+    }
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 14px;
+      color: #CBD5E1;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    strong {
+      color: #FFFFFF;
+    }
+    .tip-box {
+      background: rgba(16, 185, 129, 0.08);
+      border-left: 4px solid var(--green);
+      padding: 16px 20px;
+      border-radius: 0 12px 12px 0;
+      margin: 18px 0;
+      color: #E2E8F0;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 640px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+    .feature-pill {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .feature-pill h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    footer {
+      max-width: 900px;
+      margin: 60px auto 0;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--card-border);
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="brand">
+        <div class="brand-logo">🌤️</div>
+        <span>WeatherFlow</span>
+      </a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="how-to-use.html" class="active">How to Use</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="app-ads.txt" target="_blank">app-ads.txt</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="badge">📖 Complete User Guide &amp; Manual</div>
+    <h1>How to Use WeatherFlow</h1>
+    <div class="meta-text">
+      Master your daily atmospheric intelligence with live MET Norway forecasts, genuine air quality data, rain planners, and Android 14 home screen widgets.
+    </div>
+
+    <!-- Step 1 -->
+    <div class="card">
+      <h2><span class="step-number">1</span> First Time Setup &amp; Location Access</h2>
+      <p>When launching WeatherFlow for the first time, you can choose either automatic GPS detection or manually searching for your favorite cities:</p>
+      <ul>
+        <li><strong>Automatic GPS:</strong> Grant "While using the app" location access. WeatherFlow uses your latitude and longitude, automatically rounding them to 4 decimal places (~11 meters) for total privacy.</li>
+        <li><strong>Manual City Search:</strong> If you prefer not to share GPS coordinates, tap the <strong>Places</strong> tab on the bottom bar, type any global city (e.g. Surat, Oslo, Tokyo, New York), and tap Save.</li>
+      </ul>
+      <div class="tip-box">
+        💡 <strong>Tip:</strong> Tap the city dropdown directly at the top of the Today screen to switch between saved locations in one tap.
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="card">
+      <h2><span class="step-number">2</span> Understanding the Today Screen</h2>
+      <p>The Today screen is your meteorological command center:</p>
+      <div class="grid-2">
+        <div class="feature-pill">
+          <h3>🌡️ Temperature &amp; Scale Toggle</h3>
+          <p>Tap <strong>°C ⇄ °F</strong> at the top bar to instantly convert between Celsius and Fahrenheit globally across all cards and widgets.</p>
+        </div>
+        <div class="feature-pill">
+          <h3>⏱️ Freshness &amp; Model Run Pill</h3>
+          <p>Check the top pill for cache age and MET Norway update time. Tap the <strong>info icon</strong> to jump directly into the Forecast Trust Center.</p>
+        </div>
+        <div class="feature-pill">
+          <h3>🧭 Barometer 3-Hour Trend</h3>
+          <p>See live hPa pressure and atmospheric delta. Rapid drops indicate incoming precipitation or thunderstorms.</p>
+        </div>
+        <div class="feature-pill">
+          <h3>☀️ Sun &amp; Moon Trajectory</h3>
+          <p>Tracks astronomical sunrise, solar noon, sunset, and live lunar phase (waxing/waning, % illuminated).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="card">
+      <h2><span class="step-number">3</span> Reading Real-Time Air Quality &amp; Pollutants</h2>
+      <p>Unlike apps that estimate air quality using fake synthetic formulas, WeatherFlow integrates genuine CAMS and NOAA atmospheric chemical readings:</p>
+      <ul>
+        <li><strong>US AQI Index:</strong> Scaled 0 to 500 in accordance with EPA standards (0–50 Good, 51–100 Moderate, 101–150 Sensitive, 151–200 Unhealthy, 201–300 Very Unhealthy, 301+ Hazardous).</li>
+        <li><strong>Individual Chemical Readouts:</strong> Check real microgram concentrations for Fine Particles (<strong>PM2.5</strong>), Coarse Dust (<strong>PM10</strong>), Ground Ozone (<strong>O₃</strong>), and Nitrogen Dioxide (<strong>NO₂</strong>).</li>
+        <li><strong>Outdoor Cardio Safety:</strong> Evaluates running, cycling, and walking safety scores out of 100 based on pollution and heat index.</li>
+      </ul>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="card">
+      <h2><span class="step-number">4</span> Rain Planner &amp; Convective Uncertainty</h2>
+      <p>Microbursts and convective precipitation cells fluctuate across kilometers. WeatherFlow provides honest, scientific probability windows rather than deceptive exact-minute countdowns:</p>
+      <ul>
+        <li><strong>Window Clusters:</strong> Identifies upcoming precipitation clusters (e.g. 14:00 – 17:00, 1.2 mm accumulation).</li>
+        <li><strong>Peak Rate &amp; Confidence:</strong> Shows maximum millimeters per hour and confidence levels based on atmospheric moisture divergence.</li>
+      </ul>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="card">
+      <h2><span class="step-number">5</span> Adding Home Screen Widgets</h2>
+      <p>WeatherFlow includes 5 dynamic Material You widget form factors with frosted glass and OLED black modes:</p>
+      <ol>
+        <li>Long press any empty area on your phone's home screen.</li>
+        <li>Tap <strong>Widgets</strong> and scroll down to find <strong>WeatherFlow</strong>.</li>
+        <li>Select from:
+          <ul>
+            <li><strong>1x1 Quick Glance:</strong> Temperature badge and condition icon.</li>
+            <li><strong>4x1 Modern Pill:</strong> Sleek horizontal pill with high/low and precipitation.</li>
+            <li><strong>2x2 Radial Dial:</strong> Circular thermal indicator with wind speed and humidity.</li>
+            <li><strong>4x2 Full Forecast Matrix:</strong> Multi-day forecast with hourly projection.</li>
+            <li><strong>3x3 Atmospheric Radar:</strong> Radar preview, air quality gauge, and sun tracker.</li>
+          </ul>
+        </li>
+        <li>Drag and drop the widget onto your home screen!</li>
+      </ol>
+      <div class="tip-box">
+        ✨ <strong>Widgets Studio:</strong> Visit the <strong>You</strong> tab inside the app &gt; <strong>Home &amp; Lockscreen Widgets Studio</strong> to preview widgets, adjust glass transparency sliders, and toggle OLED black mode before adding them.
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="card">
+      <h2><span class="step-number">6</span> Activity Planner &amp; Personal Comfort Sliders</h2>
+      <p>Under the <strong>Plan</strong> and <strong>You</strong> tabs, customize your personal comfort envelope:</p>
+      <ul>
+        <li>Set your <strong>Minimum Ideal Temp</strong> (e.g. 16°C) and <strong>Maximum Ideal Temp</strong> (e.g. 24°C).</li>
+        <li>WeatherFlow dynamically calculates suitability scores (0–100%) for Running, Cycling, Walking, and Outdoor Workouts based on your thermal tolerance, wind gust limits, and air quality thresholds.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 O Square Apps. All rights reserved. &bull; <a href="privacy.html">Privacy Policy</a> &bull; <a href="app-ads.txt">app-ads.txt</a></p>
+  </footer>
+
+</body>
+</html>

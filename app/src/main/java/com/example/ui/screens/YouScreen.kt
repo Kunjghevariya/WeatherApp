@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.platform.LocalUriHandler
 import com.example.domain.WeatherIconService
 import com.example.ui.WeatherUiState
 import com.example.ui.WeatherViewModel
@@ -38,6 +40,9 @@ fun YouScreen(
 ) {
     val weatherData = uiState.weatherData
     val freshness = weatherData?.freshness
+    val uriHandler = LocalUriHandler.current
+    var isPrivacyDialogOpen by remember { mutableStateOf(false) }
+    var isGuideDialogOpen by remember { mutableStateOf(false) }
     val userSettings = uiState.userSettings
     val current = weatherData?.current
 
@@ -720,7 +725,204 @@ fun YouScreen(
                     }
                 }
             }
+
+            // Section: Official App Verification & Legal Policies
+            item {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color(0xFF132238).copy(alpha = 0.88f),
+                    tonalElevation = 4.dp,
+                    modifier = Modifier.fillMaxWidth().testTag("app_legal_card")
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Gavel,
+                                contentDescription = null,
+                                tint = Color(0xFF38BDF8),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "Legal, Privacy & Compliance",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            )
+                        }
+
+                        Text(
+                            text = "WeatherFlow is published by O Square Apps. Fully compliant with Google Play Data Safety policies, GDPR standards, and IAB Tech Lab app-ads.txt specifications.",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFFCBD5E1),
+                                fontSize = 12.sp
+                            )
+                        )
+
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.08f))
+
+                        AuditRow(label = "Application ID", value = "com.osquareapps.weather")
+                        AuditRow(label = "Developer", value = "O Square Apps")
+                        AuditRow(label = "App Version", value = "1.0 (Production Release)")
+                        AuditRow(label = "AdMob Publisher ID", value = "pub-7787849898368360")
+                        AuditRow(label = "Ad Verification", value = "app-ads.txt DIRECT Authorized")
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { uriHandler.openUri("https://weatherflow-3f663.web.app/privacy.html") },
+                                modifier = Modifier.weight(1f).testTag("btn_privacy_policy"),
+                                border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.45f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = null,
+                                    tint = Color(0xFF38BDF8),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Privacy Policy",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { uriHandler.openUri("https://weatherflow-3f663.web.app/how-to-use.html") },
+                                modifier = Modifier.weight(1f).testTag("btn_how_to_use"),
+                                border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.45f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Description,
+                                    contentDescription = null,
+                                    tint = Color(0xFF38BDF8),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "How to Use",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = { uriHandler.openUri("https://weatherflow-3f663.web.app/") },
+                            modifier = Modifier.fillMaxWidth().testTag("btn_developer_website"),
+                            border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.45f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Language,
+                                contentDescription = null,
+                                tint = Color(0xFF10B981),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Visit Developer Website (weatherflow-3f663.web.app)",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    // In-App Privacy Policy Dialog
+    if (isPrivacyDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { isPrivacyDialogOpen = false },
+            title = {
+                Text(
+                    text = "Privacy Policy",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = Color.White)
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "WeatherFlow (com.osquareapps.weather) by O Square Apps is committed to your privacy.\n\n" +
+                                "• 4-Decimal Coordinate Precision: Exact coordinates are rounded to ~11m on device before transmission.\n" +
+                                "• Zero Personal Data Sale: We do not sell or broker your personal location data.\n" +
+                                "• Weather Data: MET Norway (CC BY 4.0) & Open-Meteo European CAMS air quality.\n" +
+                                "• AdMob & app-ads.txt: Authorized publisher ID pub-7787849898368360.",
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFFCBD5E1), fontSize = 12.sp)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    isPrivacyDialogOpen = false
+                    uriHandler.openUri("https://weatherflow-3f663.web.app/privacy.html")
+                }) {
+                    Text("Open Full Policy Online", color = Color(0xFF38BDF8))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { isPrivacyDialogOpen = false }) {
+                    Text("Close", color = Color(0xFF94A3B8))
+                }
+            },
+            containerColor = Color(0xFF132238)
+        )
+    }
+
+    // In-App How to Use Guide Dialog
+    if (isGuideDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { isGuideDialogOpen = false },
+            title = {
+                Text(
+                    text = "How to Use WeatherFlow",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = Color.White)
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "1. Today Screen: Live temperature, unit toggle (°C ⇄ °F), MET Norway freshness pill, and real chemical air quality (PM2.5, PM10, O3, NO2).\n\n" +
+                                "2. Rain Planner: Clustered precipitation windows and convective uncertainty.\n\n" +
+                                "3. Home Screen Widgets: Long press your home screen > Widgets > WeatherFlow to add any of the 5 form factors.\n\n" +
+                                "4. Activity Planner: Personalize your thermal comfort envelope in the Plan tab.",
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFFCBD5E1), fontSize = 12.sp)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    isGuideDialogOpen = false
+                    uriHandler.openUri("https://weatherflow-3f663.web.app/how-to-use.html")
+                }) {
+                    Text("Open Complete Manual", color = Color(0xFF38BDF8))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { isGuideDialogOpen = false }) {
+                    Text("Got It", color = Color(0xFF94A3B8))
+                }
+            },
+            containerColor = Color(0xFF132238)
+        )
     }
 }
 

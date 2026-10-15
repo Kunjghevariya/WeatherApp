@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +36,7 @@ fun TrustCenterScreen(
     val weatherData = uiState.weatherData
     val freshness = weatherData?.freshness
     val widgetSettings = uiState.widgetSettings
+    val uriHandler = LocalUriHandler.current
 
     var selectedWidgetType by remember { mutableStateOf(widgetSettings.typeIndex) } // 0: 4x1 Hourly, 1: 2x2 Glance, 2: 4x2 Detailed
     var widgetOpacity by remember { mutableStateOf(widgetSettings.backgroundOpacity) }
@@ -499,6 +502,144 @@ fun TrustCenterScreen(
                                 text = widgetRefreshedMessage!!,
                                 style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF10B981), fontSize = 11.sp)
                             )
+                        }
+                    }
+                }
+            }
+
+            // Section 5: Official Policies & Web Verification
+            item {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color(0xFF132238).copy(alpha = 0.88f),
+                    tonalElevation = 4.dp,
+                    modifier = Modifier.fillMaxWidth().testTag("policies_verification_card")
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = null,
+                                tint = Color(0xFF10B981),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "Play Store Policies & Verification",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            )
+                        }
+
+                        Text(
+                            text = "WeatherFlow is distributed by O Square Apps in compliance with Google Play Developer Program Policies, GDPR requirements, and IAB Tech Lab verification standards.",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFFCBD5E1),
+                                fontSize = 12.sp
+                            )
+                        )
+
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.08f))
+
+                        AuditRow(label = "Application ID", value = "com.osquareapps.weather")
+                        AuditRow(label = "Developer Name", value = "O Square Apps")
+                        AuditRow(label = "AdMob Publisher ID", value = "pub-7787849898368360")
+                        AuditRow(label = "Ad Authorization", value = "DIRECT in app-ads.txt")
+                        AuditRow(label = "Hosting Domain", value = "weatherflow-3f663.web.app")
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { uriHandler.openUri("https://weatherflow-3f663.web.app/privacy.html") },
+                                modifier = Modifier.weight(1f).testTag("trust_btn_privacy"),
+                                border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.45f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Shield,
+                                    contentDescription = null,
+                                    tint = Color(0xFF38BDF8),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Privacy Policy",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { uriHandler.openUri("https://weatherflow-3f663.web.app/how-to-use.html") },
+                                modifier = Modifier.weight(1f).testTag("trust_btn_how_to_use"),
+                                border = BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.45f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Description,
+                                    contentDescription = null,
+                                    tint = Color(0xFF38BDF8),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "How to Use",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { uriHandler.openUri("https://weatherflow-3f663.web.app/") },
+                                modifier = Modifier.weight(1f).testTag("trust_btn_website"),
+                                border = BorderStroke(1.dp, Color(0xFF10B981).copy(alpha = 0.45f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Language,
+                                    contentDescription = null,
+                                    tint = Color(0xFF10B981),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Developer Site",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+
+                            OutlinedButton(
+                                onClick = { uriHandler.openUri("https://weatherflow-3f663.web.app/app-ads.txt") },
+                                modifier = Modifier.weight(1f).testTag("trust_btn_app_ads"),
+                                border = BorderStroke(1.dp, Color(0xFFF59E0B).copy(alpha = 0.45f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Code,
+                                    contentDescription = null,
+                                    tint = Color(0xFFF59E0B),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "app-ads.txt",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
                         }
                     }
                 }

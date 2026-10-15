@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "33083461280",
+    "project_id": "weatherflow-3f663",
+    "storage_bucket": "weatherflow-3f663.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33083461280:android:bc3057aeb8345dbabbc3c5",
+        "android_client_info": {
+          "package_name": "com.osquareapps.weather"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiCrpfYi9LOuOQCQ6JpO6hIHqGX2sgTr0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherFlow - Live Weather &amp; AQI | Official Developer Website</title>
+  <meta name="description" content="Experience precision atmospheric intelligence with WeatherFlow. Certified MET Norway forecasts, authentic Copernicus CAMS air quality, rain planner, and 5 Material You widgets.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070D1E;
+      --card-bg: rgba(19, 34, 56, 0.7);
+      --card-border: rgba(56, 189, 248, 0.18);
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --accent: #38BDF8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --primary: #0284C7;
+      --green: #10B981;
+      --orange: #F97316;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: radial-gradient(circle at 50% 0%, rgba(2, 132, 199, 0.25) 0%, transparent 60%),
+                        radial-gradient(circle at 10% 40%, rgba(56, 189, 248, 0.1) 0%, transparent 50%);
+    }
+    header {
+      background: rgba(11, 19, 37, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 24px;
+    }
+    .header-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #38BDF8, #0284C7);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    nav {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    nav a:hover, nav a.active {
+      color: var(--accent);
+    }
+    .btn-header {
+      padding: 8px 18px;
+      background: linear-gradient(135deg, #38BDF8, #0284C7);
+      color: #fff !important;
+      border-radius: 9999px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .hero {
+      max-width: 1100px;
+      margin: 70px auto 40px;
+      padding: 0 24px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #FFFFFF 30%, #38BDF8 80%, #0284C7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.3rem;
+      }
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: #CBD5E1;
+      max-width: 720px;
+      margin: 0 auto 36px;
+    }
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 50px;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 30px;
+      background: linear-gradient(135deg, #38BDF8, #0284C7);
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px var(--accent-glow);
+      transition: transform 0.2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: rgba(19, 34, 56, 0.8);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      border-radius: 14px;
+      transition: background 0.2s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(30, 41, 59, 0.9);
+    }
+    .app-preview-card {
+      max-width: 600px;
+      margin: 0 auto 80px;
+      background: linear-gradient(180deg, rgba(14, 165, 233, 0.15) 0%, rgba(11, 19, 37, 0.9) 100%);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .preview-city {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .preview-temp {
+      font-family: 'Outfit', sans-serif;
+      font-size: 4.5rem;
+      font-weight: 900;
+      line-height: 1;
+      margin: 10px 0;
+      color: #FFFFFF;
+    }
+    .preview-meta {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+    .preview-aqi-box {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 16px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+    .features-grid {
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+    .feature-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #FFFFFF;
+    }
+    .feature-card p {
+      color: #94A3B8;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .transparency-banner {
+      max-width: 1050px;
+      margin: 0 auto 80px;
+      padding: 36px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(11, 19, 37, 0.9) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 24px;
+      text-align: center;
+    }
+    .transparency-banner h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .transparency-banner p {
+      color: #CBD5E1;
+      max-width: 750px;
+      margin: 0 auto 24px;
+    }
+    footer {
+      max-width: 1100px;
+      margin: 40px auto 0;
+      padding: 30px 24px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+
+  <!-- Firebase Web SDK (Modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnHbvAgzErXl0OPfGZwFKzkenzYgxWsyI",
+      authDomain: "weatherflow-3f663.firebaseapp.com",
+      projectId: "weatherflow-3f663",
+      storageBucket: "weatherflow-3f663.firebasestorage.app",
+      messagingSenderId: "33083461280",
+      appId: "1:33083461280:web:a76fc9006356c053bbc3c5",
+      measurementId: "G-CMFDTGZ1TW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="brand">
+        <div class="brand-logo">🌤️</div>
+        <span>WeatherFlow</span>
+      </a>
+      <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="how-to-use.html">How to Use</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="app-ads.txt" target="_blank">app-ads.txt</a>
+        <a href="https://play.google.com/store/apps/details?id=com.osquareapps.weather" class="btn-header">Get App</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-badge">✨ Engineered by O Square Apps &bull; Powered by MET Norway</div>
+      <h1>Atmospheric Intelligence.<br>Zero Deception.</h1>
+      <p>The definitive Android weather experience. Real chemical air quality from Copernicus CAMS, MET Norway certified forecasts, and 5 frosted glass Material You widgets.</p>
+      
+      <div class="cta-group">
+        <a href="https://play.google.com/store/apps/details?id=com.osquareapps.weather" class="btn-primary">
+          <span>▶️ Download on Google Play</span>
+        </a>
+        <a href="how-to-use.html" class="btn-secondary">
+          <span>📖 User Manual &amp; Features</span>
+        </a>
+      </div>
+
+      <!-- Live Mockup Card -->
+      <div class="app-preview-card">
+        <div class="preview-header">
+          <div class="preview-city">📍 Surat, India</div>
+          <span style="background: rgba(56, 189, 248, 0.15); color: #38BDF8; padding: 4px 10px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600;">Updated Just Now &bull; MET Norway</span>
+        </div>
+        <div style="font-size: 1.1rem; color: #38BDF8; font-weight: 600;">☀️ Clear Sky</div>
+        <div class="preview-temp">36°</div>
+        <div class="preview-meta">Feels like 37° &bull; H: 36° L: 26° &bull; Barometer 1008 hPa (Stable)</div>
+        
+        <div class="preview-aqi-box">
+          <div>
+            <div style="font-size: 0.85rem; color: #FCA5A5; font-weight: 600;">AIR QUALITY &amp; HEALTH</div>
+            <div style="font-size: 1.1rem; color: #FFFFFF; font-weight: 700;">140 US AQI &bull; Unhealthy for Sensitive</div>
+            <div style="font-size: 0.8rem; color: #E2E8F0; margin-top: 4px;">PM2.5: 69.6 µg/m³ &bull; PM10: 87.1 µg/m³ &bull; O₃: 198.0 µg/m³</div>
+          </div>
+          <div style="font-size: 1.8rem; font-weight: 900; color: #F87171;">140</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Pillars Section -->
+    <section class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🏛️</span>
+        <h3>MET Norway Locationforecast 2.0</h3>
+        <p>Direct atmospheric predictions from Europe's leading meteorological institute under Creative Commons BY 4.0. Hourly temperature, cloud cover, and convective precipitation probabilities.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🧪</span>
+        <h3>Real Air Quality &amp; Pollutants</h3>
+        <p>No synthetic fake AQI formulas. Live microgram readings of Fine Particles (PM2.5), Coarse Dust (PM10), Ozone (O₃), and NO₂ from the European Copernicus Atmosphere Monitoring Service (CAMS).</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🧩</span>
+        <h3>5 Material You Widgets</h3>
+        <p>Customize 1x1 Quick Glance, 4x1 Pill, 2x2 Radial Dial, 4x2 Forecast Matrix, and 3x3 Radar widgets with real-time frosted glass opacity and OLED black themes.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🌧️</span>
+        <h3>Scientific Rain Timing</h3>
+        <p>Convective precipitation cells fluctuate across kilometers. WeatherFlow provides honest clustered hourly probability windows rather than guessing exact minutes.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🔒</span>
+        <h3>11-Meter Coordinate Privacy</h3>
+        <p>Your coordinates are strictly truncated to 4 decimal places before leaving your device. We never track or sell your exact home or street location.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🏃</span>
+        <h3>Activity Suitability Planner</h3>
+        <p>Set your custom minimum and maximum comfort temperatures. WeatherFlow calculates real-time suitability percentages for running, cycling, and walking.</p>
+      </div>
+    </section>
+
+    <!-- Transparency Statement -->
+    <section class="transparency-banner">
+      <h2>🛡️ Certified Meteorological Transparency</h2>
+      <p>WeatherFlow adheres to the highest scientific standards. We cite provider model runs, cache latency, and meteorological uncertainty in our built-in Transparency Center.</p>
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="privacy.html" class="btn-primary" style="font-size: 0.95rem; padding: 10px 22px;">Read Privacy Policy</a>
+        <a href="app-ads.txt" class="btn-secondary" style="font-size: 0.95rem; padding: 10px 22px;">View app-ads.txt</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>WeatherFlow</strong> &bull; Developed by <strong>O Square Apps</strong> (Package: <code>com.osquareapps.weather</code>)
+    </div>
+    <div style="display: flex; gap: 18px;">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="how-to-use.html">How to Use</a>
+      <a href="app-ads.txt">app-ads.txt</a>
+      <a href="mailto:support@osquareapps.com">Contact Support</a>
+    </div>
+  </footer>
+
+</body>
+</html>
