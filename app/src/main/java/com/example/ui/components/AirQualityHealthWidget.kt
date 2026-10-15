@@ -3,10 +3,8 @@ package com.example.ui.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -32,6 +30,100 @@ fun AirQualityHealthWidget(
     airQuality: AirQualityData,
     modifier: Modifier = Modifier
 ) {
+    if (!airQuality.isAvailable) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF0D1B2A).copy(alpha = 0.85f)),
+            modifier = modifier
+                .fillMaxWidth()
+                .border(1.dp, Color(0xFF64748B).copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                .testTag("air_quality_health_widget")
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Air,
+                            contentDescription = "Air Quality Icon",
+                            tint = Color(0xFF94A3B8),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "AIR QUALITY & HEALTH",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF94A3B8),
+                                letterSpacing = 1.1.sp
+                            )
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.08f)
+                    ) {
+                        Text(
+                            text = "UNAVAILABLE",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = Color(0xFF94A3B8),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            ),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color.Black.copy(alpha = 0.30f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = airQuality.healthAdvisory,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFFE2E8F0),
+                                fontSize = 12.sp,
+                                lineHeight = 17.sp
+                            )
+                        )
+                        Text(
+                            text = "WeatherFlow does not display fabricated particulate figures. Sensor observations or atmospheric models are required.",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFF94A3B8),
+                                fontSize = 11.sp
+                            )
+                        )
+                        Text(
+                            text = "Provider: ${airQuality.dataSource}",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = Color(0xFF38BDF8),
+                                fontSize = 10.sp
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
+
     val aqiColor = Color(airQuality.categoryColorHex)
     val animatedProgress by animateFloatAsState(
         targetValue = (airQuality.aqi / 300f).coerceIn(0.05f, 1f),
@@ -223,10 +315,10 @@ fun AirQualityHealthWidget(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                PollutantPill("PM2.5", "${airQuality.pm25} µg/m³", Modifier.weight(1f))
-                PollutantPill("PM10", "${airQuality.pm10} µg/m³", Modifier.weight(1f))
-                PollutantPill("O₃", "${airQuality.o3} ppb", Modifier.weight(1f))
-                PollutantPill("NO₂", "${airQuality.no2} ppb", Modifier.weight(1f))
+                PollutantPill("PM2.5", airQuality.pm25?.let { "$it µg/m³" } ?: "N/A", Modifier.weight(1f))
+                PollutantPill("PM10", airQuality.pm10?.let { "$it µg/m³" } ?: "N/A", Modifier.weight(1f))
+                PollutantPill("O₃", airQuality.o3?.let { "$it µg/m³" } ?: "N/A", Modifier.weight(1f))
+                PollutantPill("NO₂", airQuality.no2?.let { "$it µg/m³" } ?: "N/A", Modifier.weight(1f))
             }
 
             // Health Guidance Card
@@ -266,12 +358,22 @@ fun AirQualityHealthWidget(
                             lineHeight = 16.sp
                         )
                     )
+                    if (airQuality.sensitiveGroupsAdvisory.isNotEmpty()) {
+                        Text(
+                            text = "• ${airQuality.sensitiveGroupsAdvisory}",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFF94A3B8),
+                                fontSize = 11.sp,
+                                lineHeight = 15.sp
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "• ${airQuality.sensitiveGroupsAdvisory}",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color(0xFF94A3B8),
-                            fontSize = 11.sp,
-                            lineHeight = 15.sp
+                        text = "Data Source: ${airQuality.dataSource}",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = Color(0xFF38BDF8).copy(alpha = 0.8f),
+                            fontSize = 9.sp
                         )
                     )
                 }

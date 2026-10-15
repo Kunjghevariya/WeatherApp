@@ -1,5 +1,6 @@
 package com.example.domain
 
+import com.example.data.model.AirQualityCurrentData
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
@@ -7,82 +8,91 @@ import kotlin.math.*
 
 /**
  * High-accuracy astronomical, meteorological, and lifestyle analytics calculator.
- * Computes Air Quality Index, Astronomical Progression (Sunrise, Sunset, Moon Phases, Golden Hour),
+ * Evaluates verified Air Quality Index from atmospheric chemistry models,
+ * computes Astronomical Progression (Sunrise, Sunset, Moon Phases, Golden Hour),
  * Wardrobe Guidance, Wind Dynamics (Beaufort scale, Gusts, Flight Safety), and Barometric Trends.
  */
 object WeatherAnalyticsCalculator {
 
-    fun calculateAirQuality(
-        current: CurrentWeather,
-        latitude: Double
+    /**
+     * Evaluates official air quality readings from verified atmospheric chemistry models
+     * (Copernicus Atmosphere Monitoring Service CAMS / NOAA GFS via Open-Meteo).
+     * Does NOT fabricate pollution measurements from temperature or wind heuristics.
+     */
+    fun evaluateAirQuality(
+        obs: AirQualityCurrentData?,
+        dataSource: String = "Open-Meteo Air Quality (Copernicus CAMS / NOAA GFS)"
     ): AirQualityData {
-        // Estimate PM2.5 based on relative humidity, atmospheric stagnation (wind speed), and pressure
-        // When air is calm (wind < 8 km/h) and pressure is high, particulates accumulate.
-        val windDispersionFactor = max(0.4, min(2.5, 30.0 / max(5.0, current.windSpeedKmh)))
-        val humidityFactor = if (current.humidityPercent > 80) 1.25 else 1.0
-        val pressureInversionFactor = if (current.airPressureHpa > 1020) 1.2 else 1.0
+        if (obs == null || obs.usAqi == null) {
+            return AirQualityData.unavailable(
+                message = "Verified station or model air quality observations are currently unavailable for this region.",
+                source = dataSource
+            )
+        }
 
-        // Base background particulate for urban/suburban baseline
-        val basePm25 = (10.0 + (abs(latitude).toInt() % 12)) * windDispersionFactor * humidityFactor * pressureInversionFactor
-        val pm25 = (basePm25 * 10).roundToInt() / 10.0
-        val pm10 = ((pm25 * 1.85) * 10).roundToInt() / 10.0
+        val aqi = obs.usAqi.coerceIn(0, 500)
+        val pm25 = obs.pm25
+        val pm10 = obs.pm10
+        val o3 = obs.ozone
+        val no2 = obs.nitrogenDioxide
+        val co = obs.carbonMonoxide
 
-        // Ozone is higher when UV is high and temperature is warm
-        val baseO3 = max(15.0, current.uvIndex * 14.0 + (current.temperatureC * 0.8))
-        val o3 = (baseO3 * 10).roundToInt() / 10.0
-
-        val no2 = ((12.0 + (current.humidityPercent * 0.15)) * 10).roundToInt() / 10.0
-        val co = 0.4
-
-        // US AQI mapping for PM2.5
-        val aqi = when {
-            pm25 <= 12.0 -> (pm25 * (50.0 / 12.0)).roundToInt()
-            pm25 <= 35.4 -> (51 + ((pm25 - 12.1) * (49.0 / (35.4 - 12.1)))).roundToInt()
-            pm25 <= 55.4 -> (101 + ((pm25 - 35.5) * (49.0 / (55.4 - 35.5)))).roundToInt()
-            pm25 <= 150.4 -> (151 + ((pm25 - 55.5) * (49.0 / (150.4 - 55.5)))).roundToInt()
-            else -> 200 + ((pm25 - 150.5) * 0.5).roundToInt()
-        }.coerceIn(12, 380)
+        // Determine primary pollutant based on elevated thresholds
+        val primary = when {
+            pm25 != null && pm25 >= 35.0 -> "Fine Particles (PM2.5)"
+            o3 != null && o3 >= 70.0 -> "Ozone (O₃)"
+            pm10 != null && pm10 >= 50.0 -> "Coarse Dust (PM10)"
+            no2 != null && no2 >= 40.0 -> "Nitrogen Dioxide (NO₂)"
+            else -> if (pm25 != null) "Fine Particles (PM2.5)" else "Ozone (O₃)"
+        }
 
         val (category, colorHex, advisory, sensitiveAdvisory) = when {
             aqi <= 50 -> Quadruple(
                 "Good",
                 0xFF10B981, // Emerald
-                "Air quality is ideal for all outdoor activities and exercise.",
-                "No health precautions needed. Enjoy the fresh air!"
+                "Air quality is satisfactory and poses little or no risk.",
+                "Air quality is ideal for all outdoor activities and exercise."
             )
             aqi <= 100 -> Quadruple(
                 "Moderate",
                 0xFFF59E0B, // Amber
-                "Air quality is acceptable; mostly fine for outdoor exercise.",
-                "Unusually sensitive individuals may experience minor cough or irritation."
+                "Air quality is acceptable. A few unusually sensitive individuals may notice mild irritation.",
+                "Unusually sensitive individuals should consider taking breaks during prolonged outdoor exertion."
             )
             aqi <= 150 -> Quadruple(
                 "Unhealthy for Sensitive Groups",
                 0xFFF97316, // Orange
-                "General public is less likely to be affected. Take breaks if needed.",
-                "People with respiratory illness, asthma, or heart disease should limit prolonged outdoor exertion."
+                "Members of sensitive groups may experience health effects. The general public is less likely to be affected.",
+                "People with asthma, respiratory illness, or heart conditions should limit prolonged outdoor exertion."
             )
             aqi <= 200 -> Quadruple(
                 "Unhealthy",
                 0xFFEF4444, // Red
-                "Everyone may begin to experience health effects; limit strenuous exercise outdoors.",
-                "Sensitive groups should avoid prolonged outdoor exposure and keep inhalers handy."
+                "Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.",
+                "Sensitive groups should avoid prolonged outdoor exposure. Others should reduce heavy exertion outdoors."
             )
-            else -> Quadruple(
+            aqi <= 300 -> Quadruple(
                 "Very Unhealthy",
                 0xFF8B5CF6, // Purple
-                "Health alert: risk of health effects increased for everyone.",
-                "Stay indoors with filtered ventilation where possible."
+                "Health alert: the risk of health effects is increased for everyone.",
+                "Active children, older adults, and individuals with respiratory issues should avoid all outdoor exertion."
+            )
+            else -> Quadruple(
+                "Hazardous",
+                0xFF7F1D1D, // Maroon / Dark Red
+                "Emergency health warnings: the entire population is likely to be affected.",
+                "Everyone should remain indoors with clean air filtration and avoid physical activity outside."
             )
         }
 
-        val outdoorExerciseScore = (100 - (aqi * 0.65)).roundToInt().coerceIn(15, 100)
+        val outdoorExerciseScore = (100 - (aqi * 0.65)).roundToInt().coerceIn(10, 100)
 
         return AirQualityData(
+            isAvailable = true,
             aqi = aqi,
             category = category,
             categoryColorHex = colorHex,
-            primaryPollutant = if (current.uvIndex > 5) "Ozone (O₃)" else "Fine Particles (PM2.5)",
+            primaryPollutant = primary,
             pm25 = pm25,
             pm10 = pm10,
             o3 = o3,
@@ -90,9 +100,27 @@ object WeatherAnalyticsCalculator {
             co = co,
             healthAdvisory = advisory,
             sensitiveGroupsAdvisory = sensitiveAdvisory,
-            outdoorExerciseScore = outdoorExerciseScore
+            outdoorExerciseScore = outdoorExerciseScore,
+            dataSource = dataSource,
+            updatedAtIso = obs.time ?: ""
         )
     }
+
+    /**
+     * Preserved for backwards compatibility with legacy callers.
+     * Always returns an honest unavailable state rather than fabricating particulate numbers.
+     */
+    @Deprecated("Do not estimate air quality from weather variables. Use evaluateAirQuality with real atmospheric observation data.")
+    fun calculateAirQuality(
+        current: CurrentWeather,
+        latitude: Double
+    ): AirQualityData {
+        return AirQualityData.unavailable(
+            message = "Weather variables cannot reliably establish local air pollution measurements. Verified observation feeds required.",
+            source = "Open-Meteo Air Quality"
+        )
+    }
+
 
     fun calculateAstronomy(
         latitude: Double,
@@ -316,14 +344,12 @@ object WeatherAnalyticsCalculator {
     }
 
     fun calculateBarometerTrend(current: CurrentWeather, hourly: List<HourlyPoint>): BarometerTrend {
-        // Estimate 3-hour pressure change from hourly sequence
-        val delta = if (hourly.size >= 4) {
-            // MET Norway pressure trend or difference
-            val futurePoint = hourly[3]
-            // In standard troposphere, temperature & pressure fluctuate together with fronts
-            (futurePoint.temperatureC - current.temperatureC) * -0.4
+        // Compute 3-hour pressure change from numerical forecast model
+        val futurePoint = hourly.getOrNull(3)
+        val delta = if (futurePoint?.pressureHpa != null && current.airPressureHpa > 0) {
+            futurePoint.pressureHpa - current.airPressureHpa
         } else {
-            -0.6
+            0.0
         }
 
         val roundedDelta = (delta * 10).roundToInt() / 10.0

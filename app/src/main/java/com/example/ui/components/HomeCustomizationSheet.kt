@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.WeatherUiState
 import com.example.ui.WeatherViewModel
+import java.util.Locale
 
 data class CardMetadata(
     val id: String,
@@ -29,13 +31,13 @@ data class CardMetadata(
 )
 
 val CARD_REGISTRY = mapOf(
-    "radar" to CardMetadata("radar", "Live Doppler Radar", "Real-time precipitation sweep & storm tracking", Icons.Default.Radar),
+    "radar" to CardMetadata("radar", "Radar Telemetry & Precipitation", "Ground Doppler telemetry & precipitation rate tracking", Icons.Default.Radar),
     "air_health" to CardMetadata("air_health", "Air Quality & Health", "AQI, PM2.5, respiratory index & exercise safety", Icons.Default.Air),
     "time_travel" to CardMetadata("time_travel", "Time Travel Scrubber", "Scrub through 24 hours of simulated conditions", Icons.Default.Timeline),
     "rain_window" to CardMetadata("rain_window", "Rain Window & Probability", "Precipitation timing, intensity, and start/stop", Icons.Default.WaterDrop),
     "wardrobe" to CardMetadata("wardrobe", "Smart Wardrobe Advisor", "Outfits, umbrella necessity, and commute gear", Icons.Default.Checkroom),
     "hourly" to CardMetadata("hourly", "Hourly Sequence", "Step-by-step 24-hour temperature and conditions", Icons.Default.Schedule),
-    "activity" to CardMetadata("activity", "Activity Planner", "Suitability scores for walking, running, cycling", Icons.Default.DirectionsRun),
+    "activity" to CardMetadata("activity", "Activity Planner", "Suitability scores for walking, running, cycling", Icons.AutoMirrored.Filled.DirectionsRun),
     "sun_moon" to CardMetadata("sun_moon", "Celestial Astronomy", "Sunrise, sunset, golden hour, and moon illumination", Icons.Default.WbSunny),
     "wind_pressure" to CardMetadata("wind_pressure", "Wind Dynamics Compass", "Beaufort scale, directional arrows, and drone safety", Icons.Default.Explore),
     "barometer" to CardMetadata("barometer", "Barometric Pressure & Fronts", "3-hour pressure trends and weather pattern shifts", Icons.Default.Speed),
@@ -165,7 +167,10 @@ fun HomeCustomizationSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 itemsIndexed(currentOrder) { index, cardId ->
-                    val meta = CARD_REGISTRY[cardId] ?: CardMetadata(cardId, cardId.replace("_", " ").capitalize(), "", Icons.Default.Widgets)
+                    val fallbackTitle = cardId.replace("_", " ").replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                    }
+                    val meta = CARD_REGISTRY[cardId] ?: CardMetadata(cardId, fallbackTitle, "", Icons.Default.Widgets)
                     val isVisible = !hiddenCards.contains(cardId)
 
                     Surface(

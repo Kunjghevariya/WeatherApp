@@ -547,14 +547,14 @@ class WeatherViewModel(application: Application) : AndroidViewModel(application)
     private fun createDemoAlert(cityName: String): SevereAlert {
         return SevereAlert(
             id = "demo_alert",
-            event = "Flood & Heavy Rain Watch",
-            headline = "Flood Watch in effect for $cityName metropolitan basin",
+            event = "[TEST SIMULATION] Flood Watch Test",
+            headline = "[TEST] Simulated Flood Watch for $cityName Basin",
             severity = AlertSeverity.WATCH,
-            area = "$cityName Metropolitan Area & Low-lying River Basins",
-            effectiveTime = "Today, 14:00 local time",
-            expiresTime = "Tomorrow, 08:00 local time",
-            instruction = "Be prepared to take action. Monitor water levels in low-lying roads. Do not drive through flooded roadways. Secure vulnerable outdoor possessions.",
-            sourceAgency = "Regional Hydro-Meteorological Emergency Center"
+            area = "$cityName Metropolitan Area (Simulated Test)",
+            effectiveTime = "Active Test Session",
+            expiresTime = "Test Session",
+            instruction = "This is a non-emergency simulated banner for in-app test verification. No official weather emergency is active.",
+            sourceAgency = "In-App Simulation Test Mode"
         )
     }
 

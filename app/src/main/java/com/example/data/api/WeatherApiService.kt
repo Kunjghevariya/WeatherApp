@@ -1,5 +1,6 @@
 package com.example.data.api
 
+import com.example.data.model.AirQualityResponse
 import com.example.data.model.MetWeatherResponse
 import com.example.data.model.NwsAlertsResponse
 import com.squareup.moshi.Moshi
@@ -32,6 +33,15 @@ interface NwsAlertsApi {
     ): Response<NwsAlertsResponse>
 }
 
+interface AirQualityApi {
+    @GET("v1/air-quality")
+    suspend fun getAirQuality(
+        @Query("latitude") lat: Double,
+        @Query("longitude") lon: Double,
+        @Query("current") current: String = "us_aqi,pm2_5,pm10,carbon_monoxide,nitrogen_dioxide,ozone"
+    ): Response<AirQualityResponse>
+}
+
 object NetworkClient {
     private val moshi: Moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
@@ -62,4 +72,14 @@ object NetworkClient {
             .build()
             .create(NwsAlertsApi::class.java)
     }
+
+    val airQualityApi: AirQualityApi by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://air-quality-api.open-meteo.com/")
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(AirQualityApi::class.java)
+    }
 }
+

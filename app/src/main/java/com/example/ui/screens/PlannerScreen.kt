@@ -310,7 +310,7 @@ fun PlannerScreen(
                                 }
                             }
 
-                            Divider(color = Color.White.copy(alpha = 0.1f))
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
 
                             Text(
                                 text = "FORECAST FACTORS BREAKDOWN",

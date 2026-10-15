@@ -46,7 +46,8 @@ data class HourlyPoint(
     val windDirectionDeg: Double,
     val windCardinal: String,
     val humidityPercent: Int,
-    val isDaylight: Boolean = true
+    val isDaylight: Boolean = true,
+    val pressureHpa: Double? = null
 )
 
 data class DailyPoint(
@@ -136,18 +137,18 @@ data class DataFreshness(
 )
 
 val DEFAULT_HOME_CARDS = listOf(
-    "radar",
-    "air_health",
-    "time_travel",
-    "rain_window",
-    "wardrobe",
     "hourly",
+    "rain_window",
+    "daily",
+    "air_health",
+    "radar",
+    "time_travel",
+    "wardrobe",
     "activity",
     "sun_moon",
     "wind_pressure",
     "barometer",
-    "metrics",
-    "daily"
+    "metrics"
 )
 
 data class UserSettings(
@@ -173,19 +174,46 @@ data class UserSettings(
 )
 
 data class AirQualityData(
-    val aqi: Int,
-    val category: String,
-    val categoryColorHex: Long,
-    val primaryPollutant: String,
-    val pm25: Double,
-    val pm10: Double,
-    val o3: Double,
-    val no2: Double,
-    val co: Double,
-    val healthAdvisory: String,
-    val sensitiveGroupsAdvisory: String,
-    val outdoorExerciseScore: Int
-)
+    val isAvailable: Boolean = true,
+    val aqi: Int = 0,
+    val category: String = "Unavailable",
+    val categoryColorHex: Long = 0xFF64748B,
+    val primaryPollutant: String = "None",
+    val pm25: Double? = null,
+    val pm10: Double? = null,
+    val o3: Double? = null,
+    val no2: Double? = null,
+    val co: Double? = null,
+    val healthAdvisory: String = "No air quality data available for this location.",
+    val sensitiveGroupsAdvisory: String = "",
+    val outdoorExerciseScore: Int = 50,
+    val dataSource: String = "Open-Meteo Air Quality (Copernicus CAMS / NOAA)",
+    val updatedAtIso: String = ""
+) {
+    companion object {
+        fun unavailable(
+            message: String = "Air quality observations are unavailable for this location or device is offline.",
+            source: String = "Open-Meteo Air Quality API"
+        ): AirQualityData {
+            return AirQualityData(
+                isAvailable = false,
+                aqi = 0,
+                category = "Unavailable",
+                categoryColorHex = 0xFF64748B,
+                primaryPollutant = "N/A",
+                pm25 = null,
+                pm10 = null,
+                o3 = null,
+                no2 = null,
+                co = null,
+                healthAdvisory = message,
+                sensitiveGroupsAdvisory = "Check official local environmental authorities for real-time sensor observations.",
+                outdoorExerciseScore = 0,
+                dataSource = source
+            )
+        }
+    }
+}
 
 data class AstronomyData(
     val sunriseTime: String,

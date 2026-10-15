@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
 import com.example.domain.ActivityCalculator
 import com.example.domain.WeatherConditionType
 import com.example.domain.WeatherIconService
@@ -282,146 +283,239 @@ fun HomeScreen(
             }
         }
 
-        // 4. Hero Temperature & Conditions Display
+        // 4. Hero Section: Weather Display OR Loading OR Unavailable State
         item {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp)
                     .testTag("weather_hero_section"),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                contentAlignment = Alignment.Center
             ) {
-                // Condition Material Icon + Label + Emoji
-                Surface(
-                    shape = RoundedCornerShape(24.dp),
-                    color = Color.Black.copy(alpha = 0.28f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
-                    modifier = Modifier.padding(bottom = 4.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                if (weatherData != null) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(
-                            imageVector = WeatherIconService.getStandardizedIcon(symbolCode),
-                            contentDescription = conditionLabel,
-                            tint = WeatherIconService.getIconTint(symbolCode),
-                            modifier = Modifier
-                                .size(28.dp)
-                                .testTag("home_weather_material_icon")
-                        )
+                        // Condition Material Icon + Label + Emoji
+                        Surface(
+                            shape = RoundedCornerShape(24.dp),
+                            color = Color.Black.copy(alpha = 0.28f),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = WeatherIconService.getStandardizedIcon(symbolCode),
+                                    contentDescription = conditionLabel,
+                                    tint = WeatherIconService.getIconTint(symbolCode),
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .testTag("home_weather_material_icon")
+                                )
+                                Text(
+                                    text = conditionLabel,
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color.White,
+                                        fontSize = 20.sp
+                                    )
+                                )
+                                Text(
+                                    text = getConditionEmoji(conditionType),
+                                    fontSize = 24.sp
+                                )
+                            }
+                        }
+
+                        // Primary Large Temperature
                         Text(
-                            text = conditionLabel,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.SemiBold,
+                            text = displayTemp,
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontWeight = FontWeight.Bold,
                                 color = Color.White,
-                                fontSize = 20.sp
+                                fontSize = 72.sp
                             )
                         )
+
+                        // High / Low & Feels Like
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Feels like $displayFeelsLike",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = Color(0xFFE2E8F0),
+                                    fontSize = 14.sp
+                                )
+                            )
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = Color.White.copy(alpha = 0.5f))
+                            )
+                            Text(
+                                text = "H: $displayHigh  L: $displayLow",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White,
+                                    fontSize = 14.sp
+                                )
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // Next Expected Weather Change pill
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color.Black.copy(alpha = 0.28f),
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            Text(
+                                text = "Next: $nextChange",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color(0xFF38BDF8),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp
+                                ),
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                } else if (uiState.isLoading) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFF38BDF8),
+                            modifier = Modifier.size(36.dp),
+                            strokeWidth = 3.dp
+                        )
                         Text(
-                            text = getConditionEmoji(conditionType),
-                            fontSize = 24.sp
+                            text = "Retrieving meteorological models...",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 14.sp
+                            )
                         )
                     }
-                }
-
-                // Primary Large Temperature
-                Text(
-                    text = displayTemp,
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 72.sp
-                    )
-                )
-
-                // High / Low & Feels Like
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Feels like $displayFeelsLike",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color(0xFFE2E8F0),
-                            fontSize = 14.sp
-                        )
-                    )
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = Color.White.copy(alpha = 0.5f))
-                    )
-                    Text(
-                        text = "H: $displayHigh  L: $displayLow",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                            fontSize = 14.sp
-                        )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Next Expected Weather Change pill
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color.Black.copy(alpha = 0.28f),
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    Text(
-                        text = "Next: $nextChange",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color(0xFF38BDF8),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 12.sp
-                        ),
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
-                    )
+                } else {
+                    // Weather data unavailable and not currently loading (e.g. network failure with empty cache)
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color.Black.copy(alpha = 0.35f),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CloudOff,
+                                contentDescription = "Forecast Unavailable",
+                                tint = Color(0xFF94A3B8),
+                                modifier = Modifier.size(44.dp)
+                            )
+                            Text(
+                                text = "Forecast Data Unavailable",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontSize = 17.sp
+                                )
+                            )
+                            Text(
+                                text = uiState.errorMessage ?: "Unable to establish contact with weather services and no offline forecast is cached. Please check your network connection.",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color(0xFFCBD5E1),
+                                    textAlign = TextAlign.Center,
+                                    lineHeight = 18.sp
+                                )
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Button(
+                                    onClick = { viewModel.refresh() },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0284C7)),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Retry", fontSize = 13.sp)
+                                }
+                                OutlinedButton(
+                                    onClick = onNavigateToPlaces,
+                                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF38BDF8))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Select City", color = Color.White, fontSize = 13.sp)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
         // 5. Category Filter Chips (Horizontal Scrollable Strip)
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                WeatherCategoryFilter.values().forEach { filter ->
-                    val isSelected = selectedFilter == filter
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) Color(0xFF0284C7) else Color.Black.copy(alpha = 0.28f),
-                        border = if (isSelected) ButtonDefaults.outlinedButtonBorder(true) else null,
-                        modifier = Modifier
-                            .clickable { selectedFilter = filter }
-                            .testTag("filter_chip_${filter.name.lowercase()}")
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        if (weatherData != null) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    WeatherCategoryFilter.values().forEach { filter ->
+                        val isSelected = selectedFilter == filter
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (isSelected) Color(0xFF0284C7) else Color.Black.copy(alpha = 0.28f),
+                            border = if (isSelected) ButtonDefaults.outlinedButtonBorder(true) else null,
+                            modifier = Modifier
+                                .clickable { selectedFilter = filter }
+                                .testTag("filter_chip_${filter.name.lowercase()}")
                         ) {
-                            Icon(
-                                imageVector = filter.icon,
-                                contentDescription = null,
-                                tint = if (isSelected) Color.White else Color(0xFF94A3B8),
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Text(
-                                text = filter.label,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    color = if (isSelected) Color.White else Color(0xFFCBD5E1),
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 12.sp
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = filter.icon,
+                                    contentDescription = null,
+                                    tint = if (isSelected) Color.White else Color(0xFF94A3B8),
+                                    modifier = Modifier.size(15.dp)
                                 )
-                            )
+                                Text(
+                                    text = filter.label,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = if (isSelected) Color.White else Color(0xFFCBD5E1),
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        fontSize = 12.sp
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -512,7 +606,7 @@ fun HomeScreen(
                         }
                     }
                     "wind_pressure" -> {
-                        if (weatherData?.windDynamics != null && weatherData.current != null && (selectedFilter == WeatherCategoryFilter.ALL || selectedFilter == WeatherCategoryFilter.WIND_PRESSURE)) {
+                        if (weatherData?.windDynamics != null && (selectedFilter == WeatherCategoryFilter.ALL || selectedFilter == WeatherCategoryFilter.WIND_PRESSURE)) {
                             item(key = "card_wind_pressure") {
                                 WindCompassWidget(
                                     current = weatherData.current,

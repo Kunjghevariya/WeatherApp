@@ -8,9 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingFlat
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingFlat
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,9 +38,9 @@ fun BarometerTrendWidget(
     }
 
     val trendIcon = when {
-        trend.change3hHpa < -0.4 -> Icons.Default.TrendingDown
-        trend.change3hHpa > 0.4 -> Icons.Default.TrendingUp
-        else -> Icons.Default.TrendingFlat
+        trend.change3hHpa < -0.4 -> Icons.AutoMirrored.Filled.TrendingDown
+        trend.change3hHpa > 0.4 -> Icons.AutoMirrored.Filled.TrendingUp
+        else -> Icons.AutoMirrored.Filled.TrendingFlat
     }
 
     Card(

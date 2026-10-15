@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -61,7 +62,7 @@ fun ActivityPlannerCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.DirectionsRun,
+                            imageVector = Icons.AutoMirrored.Filled.DirectionsRun,
                             contentDescription = "Activity Planner Icon",
                             tint = Color(0xFF10B981),
                             modifier = Modifier.size(20.dp)
@@ -219,7 +220,7 @@ fun ActivityPlannerCard(
                             )
                         )
 
-                        Divider(color = Color.White.copy(alpha = 0.1f))
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
 
                         // Factors breakdown
                         Text(

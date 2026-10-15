@@ -30,6 +30,8 @@ data class WeatherFetchResult(
     val cachedAgeLabel: String = ""
 )
 
+class WeatherUnavailableException(message: String) : Exception(message)
+
 class WeatherRepository(
     private val weatherDao: WeatherDao,
     private val forecastDao: ForecastDao
@@ -44,6 +46,10 @@ class WeatherRepository(
         timezoneId: String = "UTC",
         forceRefresh: Boolean = false
     ): WeatherFetchResult = withContext(Dispatchers.IO) {
+        if (latitude !in -90.0..90.0 || longitude !in -180.0..180.0) {
+            throw IllegalArgumentException("Invalid geographic coordinates: ($latitude, $longitude)")
+        }
+
         // Round to 4 decimal places per MET Norway API usage guidelines
         val roundedLat = String.format(Locale.US, "%.4f", latitude).toDouble()
         val roundedLon = String.format(Locale.US, "%.4f", longitude).toDouble()
@@ -187,8 +193,28 @@ class WeatherRepository(
             }
         }
 
-        // Complete offline fallback synthesis (ensures pristine UX even with zero connectivity)
-        return@withContext createFallbackWeatherData(roundedLat, roundedLon, cityName, timezoneId, isOffline = true)
+        // Both network and cache are unavailable - report honest error rather than fake synthetic data
+        throw WeatherUnavailableException("Forecast data is currently unavailable for $cityName. Please connect to the internet and tap refresh.")
+    }
+
+    private suspend fun fetchAirQualitySafely(lat: Double, lon: Double): AirQualityData {
+        return try {
+            val response = NetworkClient.airQualityApi.getAirQuality(lat = lat, lon = lon)
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                WeatherAnalyticsCalculator.evaluateAirQuality(body.current)
+            } else {
+                AirQualityData.unavailable(
+                    message = "Air quality observations unavailable for this coordinate.",
+                    source = "Open-Meteo Air Quality (CAMS / NOAA)"
+                )
+            }
+        } catch (_: Exception) {
+            AirQualityData.unavailable(
+                message = "Air quality observations unavailable while offline.",
+                source = "Open-Meteo Air Quality (CAMS / NOAA)"
+            )
+        }
     }
 
     private suspend fun fetchAlertsSafely(lat: Double, lon: Double): List<SevereAlert> {
@@ -241,9 +267,9 @@ class WeatherRepository(
         val timeseries = response.properties?.timeseries ?: emptyList()
         val providerUpdated = response.properties?.meta?.updatedAt ?: ""
 
-        val hourlyList = timeseries.map { parseHourlyPoint(it) }
+        val hourlyList = timeseries.map { parseHourlyPoint(it, timezoneId) }
         val current = parseCurrentWeather(timeseries, hourlyList)
-        val dailyList = parseDailyForecast(timeseries)
+        val dailyList = parseDailyForecast(timeseries, timezoneId)
         val rainWindow = RainPlanner.calculateRainWindow(hourlyList, providerUpdated)
 
         val cachedAgeLabel = if (isOffline) formatCachedAge(lastFetched) else ""
@@ -310,7 +336,7 @@ class WeatherRepository(
             // Non-critical local persistence failure
         }
 
-        val airQuality = WeatherAnalyticsCalculator.calculateAirQuality(current, lat)
+        val airQuality = fetchAirQualitySafely(lat, lon)
         val astronomy = WeatherAnalyticsCalculator.calculateAstronomy(lat, lon, timezoneId)
         val wardrobe = WeatherAnalyticsCalculator.calculateWardrobe(current, rainWindow, hourlyList, UserSettings())
         val windDynamics = WeatherAnalyticsCalculator.calculateWindDynamics(current, hourlyList)
@@ -345,7 +371,7 @@ class WeatherRepository(
         return forecastDao.getForecastMetadata(locationKey)
     }
 
-    private fun parseHourlyPoint(item: MetTimeSeriesItem): HourlyPoint {
+    private fun parseHourlyPoint(item: MetTimeSeriesItem, timezoneId: String): HourlyPoint {
         val details = item.data.instant?.details
         val next1 = item.data.next1Hours
         val next6 = item.data.next6Hours
@@ -354,6 +380,7 @@ class WeatherRepository(
         val windSpeed = (details?.windSpeed ?: 3.0) * 3.6 // m/s to km/h
         val windDeg = details?.windFromDirection ?: 0.0
         val humidity = (details?.relativeHumidity ?: 50.0).roundToInt()
+        val pressure = details?.airPressureAtSeaLevel
 
         val symbol = next1?.summary?.symbolCode
             ?: next6?.summary?.symbolCode
@@ -362,7 +389,7 @@ class WeatherRepository(
         val precipProb = (next1?.details?.probabilityOfPrecipitation ?: 0.0).roundToInt()
         val precipMm = next1?.details?.precipitationAmount ?: 0.0
 
-        val (hourLabel, isDay) = formatHourLabel(item.time)
+        val (hourLabel, isDay) = formatHourLabel(item.time, timezoneId, symbol)
         val conditionType = mapSymbolToCondition(symbol)
 
         return HourlyPoint(
@@ -377,7 +404,8 @@ class WeatherRepository(
             windDirectionDeg = windDeg,
             windCardinal = degreesToCardinal(windDeg),
             humidityPercent = humidity,
-            isDaylight = isDay
+            isDaylight = isDay,
+            pressureHpa = pressure
         )
     }
 
@@ -479,19 +507,20 @@ class WeatherRepository(
         return "Stable conditions expected through the evening"
     }
 
-    private fun parseDailyForecast(timeseries: List<MetTimeSeriesItem>): List<DailyPoint> {
+    private fun parseDailyForecast(timeseries: List<MetTimeSeriesItem>, timezoneId: String): List<DailyPoint> {
+        val tz = try { TimeZone.getTimeZone(timezoneId) } catch (_: Exception) { TimeZone.getTimeZone("UTC") }
         val groupedByDate = LinkedHashMap<String, MutableList<MetTimeSeriesItem>>()
         val dateParser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
         val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
+            timeZone = tz
         }
         val dayDisplayFormat = SimpleDateFormat("EEE", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
+            timeZone = tz
         }
         val monthDayFormat = SimpleDateFormat("MMM d", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
+            timeZone = tz
         }
 
         for (item in timeseries) {
@@ -593,16 +622,21 @@ class WeatherRepository(
         }
     }
 
-    private fun formatHourLabel(isoTime: String): Pair<String, Boolean> {
+    private fun formatHourLabel(isoTime: String, timezoneId: String, symbolCode: String): Pair<String, Boolean> {
         return try {
             val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }
             val d = parser.parse(isoTime) ?: return Pair("--", true)
-            val cal = Calendar.getInstance().apply { time = d }
+            val tz = try { TimeZone.getTimeZone(timezoneId) } catch (_: Exception) { TimeZone.getTimeZone("UTC") }
+            val cal = Calendar.getInstance(tz).apply { time = d }
             val hour24 = cal.get(Calendar.HOUR_OF_DAY)
             val label = String.format(Locale.US, "%02d:00", hour24)
-            val isDay = hour24 in 6..20
+            val isDay = when {
+                symbolCode.contains("night") -> false
+                symbolCode.contains("day") -> true
+                else -> hour24 in 6..20
+            }
             Pair(label, isDay)
         } catch (_: Exception) {
             Pair("--", true)
@@ -634,103 +668,5 @@ class WeatherRepository(
             else -> "${diffMin / 1440}d ago"
         }
     }
-
-    private fun createFallbackWeatherData(
-        lat: Double,
-        lon: Double,
-        cityName: String,
-        timezoneId: String = "UTC",
-        isOffline: Boolean = false
-    ): WeatherFetchResult {
-        val now = System.currentTimeMillis()
-        val hourly = (0..23).map { i ->
-            val temp = 18.0 + (5.0 * Math.sin((i - 6) * Math.PI / 12.0))
-            val rainProb = if (i in 14..17) 45 else 5
-            val cond = if (i in 14..17) WeatherConditionType.LIGHT_RAIN else if (i in 7..19) WeatherConditionType.PARTLY_CLOUDY_DAY else WeatherConditionType.PARTLY_CLOUDY_NIGHT
-            HourlyPoint(
-                timeIso = "2026-10-13T${String.format(Locale.US, "%02d", i)}:00:00Z",
-                hourLabel = "${String.format(Locale.US, "%02d", i)}:00",
-                temperatureC = temp,
-                conditionType = cond,
-                symbolCode = if (i in 14..17) "rain" else "partlycloudy_day",
-                precipProbability = rainProb,
-                precipAmountMm = if (i in 14..17) 0.8 else 0.0,
-                windSpeedKmh = 14.0,
-                windDirectionDeg = 240.0,
-                windCardinal = "SW",
-                humidityPercent = 62,
-                isDaylight = i in 6..20
-            )
-        }
-
-        val current = CurrentWeather(
-            temperatureC = 20.4,
-            feelsLikeC = 19.8,
-            minTempTodayC = 14.2,
-            maxTempTodayC = 23.5,
-            conditionType = WeatherConditionType.PARTLY_CLOUDY_DAY,
-            conditionLabel = "Partly Cloudy",
-            symbolCode = "partlycloudy_day",
-            humidityPercent = 58,
-            windSpeedKmh = 12.4,
-            windDirectionDeg = 210.0,
-            windCardinal = "SSW",
-            cloudCoverPercent = 40,
-            uvIndex = 4.2,
-            airPressureHpa = 1015.4,
-            dewPointC = 11.8,
-            nextChangeDescription = "Light shower possible between 14:00 – 17:00"
-        )
-
-        val daily = listOf(
-            DailyPoint("2026-10-13", "Today", "Oct 13", 14.0, 23.0, WeatherConditionType.PARTLY_CLOUDY_DAY, "partlycloudy_day", "Partly Cloudy", 45, 1.2),
-            DailyPoint("2026-10-14", "Tomorrow", "Oct 14", 13.0, 21.0, WeatherConditionType.CLEAR_DAY, "clearsky_day", "Clear Sky", 10, 0.0),
-            DailyPoint("2026-10-15", "Thu", "Oct 15", 12.0, 20.0, WeatherConditionType.CLOUDY, "cloudy", "Overcast", 20, 0.1),
-            DailyPoint("2026-10-16", "Fri", "Oct 16", 14.0, 22.0, WeatherConditionType.LIGHT_RAIN, "rain", "Scattered Showers", 60, 3.4),
-            DailyPoint("2026-10-17", "Sat", "Oct 17", 15.0, 24.0, WeatherConditionType.CLEAR_DAY, "clearsky_day", "Sunny", 5, 0.0),
-            DailyPoint("2026-10-18", "Sun", "Oct 18", 16.0, 25.0, WeatherConditionType.PARTLY_CLOUDY_DAY, "partlycloudy_day", "Pleasant", 10, 0.0),
-            DailyPoint("2026-10-19", "Mon", "Oct 19", 13.0, 19.0, WeatherConditionType.WINDY, "wind", "Breezy", 15, 0.0)
-        )
-
-        val rainWindow = RainWindow(
-            hasRain = true,
-            startHour = "14:00",
-            endHour = "17:00",
-            peakProbability = 45,
-            totalEstimatedMm = 1.2,
-            confidenceRating = "Moderate Confidence",
-            summaryHeadline = "Scattered showers between 14:00 – 17:00",
-            detailedReasoning = "Convective cloud build-up expected during afternoon. Umbrella recommended for evening commute.",
-            modelLastUpdatedAt = "2026-10-13T10:00:00Z"
-        )
-
-        val freshness = DataFreshness(
-            status = if (isOffline) FreshnessStatus.STALE else FreshnessStatus.CACHED,
-            lastFetchedEpochMs = now,
-            providerUpdatedAtIso = "2026-10-13T10:00:00Z",
-            latencyOrAgeText = if (isOffline) "Cached (offline mode)" else "Preloaded demonstration cache"
-        )
-
-        val airQuality = WeatherAnalyticsCalculator.calculateAirQuality(current, lat)
-        val astronomy = WeatherAnalyticsCalculator.calculateAstronomy(lat, lon, timezoneId)
-        val wardrobe = WeatherAnalyticsCalculator.calculateWardrobe(current, rainWindow, hourly, UserSettings())
-        val windDynamics = WeatherAnalyticsCalculator.calculateWindDynamics(current, hourly)
-        val barometerTrend = WeatherAnalyticsCalculator.calculateBarometerTrend(current, hourly)
-
-        return WeatherFetchResult(
-            current = current,
-            hourly = hourly,
-            daily = daily,
-            rainWindow = rainWindow,
-            alerts = emptyList(),
-            freshness = freshness,
-            airQuality = airQuality,
-            astronomy = astronomy,
-            wardrobe = wardrobe,
-            windDynamics = windDynamics,
-            barometerTrend = barometerTrend,
-            isOffline = isOffline,
-            cachedAgeLabel = if (isOffline) "Offline cached fallback" else ""
-        )
-    }
 }
+

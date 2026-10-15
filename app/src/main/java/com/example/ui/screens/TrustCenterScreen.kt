@@ -122,10 +122,11 @@ fun TrustCenterScreen(
                             )
                         )
 
-                        Divider(color = Color.White.copy(alpha = 0.1f))
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
 
                         AuditRow(label = "Primary Weather Provider", value = "MET Norway (Meteorologisk Institutt)")
                         AuditRow(label = "Data Product", value = "Locationforecast 2.0 (Compact JSON)")
+                        AuditRow(label = "Air Quality Provider", value = "Open-Meteo Air Quality / Copernicus CAMS")
                         AuditRow(label = "Licensing & Attribution", value = "Creative Commons BY 4.0")
                         AuditRow(label = "Provider Model Run", value = freshness?.providerUpdatedAtIso ?: "Recent model run")
                         AuditRow(label = "Client Cache Status", value = freshness?.latencyOrAgeText ?: "Live")

@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
 import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.DirectionsBike
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.*
@@ -293,7 +293,7 @@ fun WindCompassWidget(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.DirectionsBike,
+                            imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
                             contentDescription = null,
                             tint = Color(0xFF10B981),
                             modifier = Modifier.size(16.dp)

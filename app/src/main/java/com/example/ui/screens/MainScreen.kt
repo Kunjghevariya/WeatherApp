@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -30,7 +32,7 @@ enum class MainTab(
 ) {
     TODAY("Today", Icons.Filled.WbSunny, Icons.Outlined.WbSunny),
     TIMELINE("Timeline", Icons.Filled.Schedule, Icons.Outlined.Schedule),
-    PLAN("Plan", Icons.Filled.DirectionsRun, Icons.Outlined.DirectionsRun),
+    PLAN("Plan", Icons.AutoMirrored.Filled.DirectionsRun, Icons.AutoMirrored.Outlined.DirectionsRun),
     PLACES("Places", Icons.Filled.LocationOn, Icons.Outlined.LocationOn),
     YOU("You", Icons.Filled.Person, Icons.Outlined.Person)
 }

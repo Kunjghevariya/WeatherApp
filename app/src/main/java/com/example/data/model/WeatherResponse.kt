@@ -97,3 +97,26 @@ data class NwsAlertProperties(
     @Json(name = "areaDesc") val areaDesc: String? = null,
     @Json(name = "senderName") val senderName: String? = null
 )
+
+// Open-Meteo Air Quality Models (Copernicus CAMS & NOAA GFS real atmospheric observation models)
+@JsonClass(generateAdapter = true)
+data class AirQualityResponse(
+    @Json(name = "latitude") val latitude: Double? = null,
+    @Json(name = "longitude") val longitude: Double? = null,
+    @Json(name = "generationtime_ms") val generationTimeMs: Double? = null,
+    @Json(name = "timezone") val timezone: String? = null,
+    @Json(name = "current") val current: AirQualityCurrentData? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class AirQualityCurrentData(
+    @Json(name = "time") val time: String? = null,
+    @Json(name = "interval") val interval: Int? = null,
+    @Json(name = "us_aqi") val usAqi: Int? = null,
+    @Json(name = "pm2_5") val pm25: Double? = null,
+    @Json(name = "pm10") val pm10: Double? = null,
+    @Json(name = "carbon_monoxide") val carbonMonoxide: Double? = null,
+    @Json(name = "nitrogen_dioxide") val nitrogenDioxide: Double? = null,
+    @Json(name = "ozone") val ozone: Double? = null
+)
+

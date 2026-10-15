@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,13 +11,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -35,6 +36,11 @@ enum class RadarLayer {
     WIND_VECTORS
 }
 
+/**
+ * WeatherRadarWidget provides an atmospheric scope visualization and radar roadmap.
+ * Explicitly distinguishes numerical weather prediction model fields from observed ground Doppler telemetry,
+ * ensuring full meteorological honesty without fabricating synthetic sensor blobs.
+ */
 @Composable
 fun WeatherRadarWidget(
     current: CurrentWeather,
@@ -44,26 +50,27 @@ fun WeatherRadarWidget(
 ) {
     var selectedLayer by remember { mutableStateOf(RadarLayer.PRECIPITATION) }
     var timeOffsetIndex by remember { mutableIntStateOf(3) } // 0: -45m, 1: -30m, 2: -15m, 3: NOW, 4: +30m, 5: +60m, 6: +90m
-    var isPlaying by remember { mutableStateOf(true) }
-    var zoomLevel by remember { mutableFloatStateOf(1.0f) } // 0.8f .. 1.4f
+    var isPlaying by remember { mutableStateOf(false) }
+    var zoomLevel by remember { mutableFloatStateOf(1.0f) }
+    var showRoadmapDialog by remember { mutableStateOf(false) }
 
     val timeLabels = listOf("-45m", "-30m", "-15m", "LIVE", "+30m", "+60m", "+90m")
 
-    // Automatic playback loop
+    // Playback loop (only runs when active)
     LaunchedEffect(isPlaying) {
         while (isPlaying) {
-            delay(1200)
+            delay(1400)
             timeOffsetIndex = (timeOffsetIndex + 1) % timeLabels.size
         }
     }
 
-    // Sweep angle continuous rotation
+    // Sweep angle animation
     val infiniteTransition = rememberInfiniteTransition(label = "RadarSweep")
     val sweepAngle by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
+            animation = tween(5000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "SweepAngle"
@@ -83,7 +90,7 @@ fun WeatherRadarWidget(
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Header: Title, Live indicator, and Play/Pause
+            // Header: Title, Telemetry indicator, and Info button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -96,10 +103,10 @@ fun WeatherRadarWidget(
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .background(if (isPlaying) Color(0xFF10B981) else Color(0xFFF59E0B), CircleShape)
+                            .background(if (isPlaying) Color(0xFF10B981) else Color(0xFF94A3B8), CircleShape)
                     )
                     Text(
-                        text = "LIVE DOPPLER RADAR",
+                        text = "ATMOSPHERIC SCOPE & RADAR",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF38BDF8),
@@ -112,6 +119,18 @@ fun WeatherRadarWidget(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    IconButton(
+                        onClick = { showRoadmapDialog = true },
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "Radar Data Source Info",
+                            tint = Color(0xFF38BDF8),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
                     Surface(
                         shape = RoundedCornerShape(8.dp),
                         color = Color.White.copy(alpha = 0.1f),
@@ -165,12 +184,12 @@ fun WeatherRadarWidget(
                     val center = Offset(size.width / 2f, size.height / 2f)
                     val maxRadius = (min(size.width, size.height) / 2f - 16f) * zoomLevel
 
-                    // Draw 4 Range Rings
+                    // 4 Range Rings (25km, 50km, 75km, 100km range)
                     val ringSteps = 4
                     for (i in 1..ringSteps) {
                         val r = maxRadius * (i.toFloat() / ringSteps)
                         drawCircle(
-                            color = Color(0xFF1E3A8A).copy(alpha = 0.4f),
+                            color = Color(0xFF1E3A8A).copy(alpha = 0.35f),
                             radius = r,
                             center = center,
                             style = Stroke(width = 1.dp.toPx())
@@ -191,130 +210,47 @@ fun WeatherRadarWidget(
                         strokeWidth = 1.dp.toPx()
                     )
 
-                    // Draw Cardinal Markers
-                    // Synthetic precipitation echo cells moving along wind vector
-                    val windAngleRad = Math.toRadians(current.windDirectionDeg)
-                    val timeDrift = (timeOffsetIndex - 3) * 18f
-                    val driftX = (sin(windAngleRad) * timeDrift).toFloat()
-                    val driftY = (-cos(windAngleRad) * timeDrift).toFloat()
-
-                    val baseRainIntensity = if (rainWindow.hasRain) {
-                        (rainWindow.peakProbability / 100f).coerceIn(0.35f, 0.95f)
-                    } else {
-                        (current.cloudCoverPercent / 100f * 0.4f).coerceIn(0.1f, 0.45f)
-                    }
-
-                    when (selectedLayer) {
-                        RadarLayer.PRECIPITATION -> {
-                            // Draw 5 realistic radar precipitation blobs
-                            val blobOffsets = listOf(
-                                Offset(-35f, -25f),
-                                Offset(45f, -40f),
-                                Offset(-60f, 35f),
-                                Offset(20f, 50f),
-                                Offset(-10f, 10f)
-                            )
-                            val blobSizes = listOf(48f, 65f, 52f, 40f, 35f)
-
-                            blobOffsets.forEachIndexed { idx, baseOffset ->
-                                val blobCenter = Offset(
-                                    center.x + (baseOffset.x + driftX) * zoomLevel,
-                                    center.y + (baseOffset.y + driftY) * zoomLevel
-                                )
-                                val radius = blobSizes[idx] * baseRainIntensity * zoomLevel
-
-                                val blobColor = when {
-                                    idx == 1 && baseRainIntensity > 0.6f -> Color(0xFFEF4444).copy(alpha = 0.75f) // Heavy Red
-                                    idx == 0 && baseRainIntensity > 0.4f -> Color(0xFFF59E0B).copy(alpha = 0.70f) // Moderate Amber
-                                    else -> Color(0xFF10B981).copy(alpha = 0.60f) // Light Green
-                                }
-
-                                drawCircle(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(blobColor, blobColor.copy(alpha = 0.15f), Color.Transparent),
-                                        center = blobCenter,
-                                        radius = radius
-                                    ),
-                                    center = blobCenter,
-                                    radius = radius
-                                )
-                            }
-                        }
-
-                        RadarLayer.CLOUDS -> {
-                            // Cloud density infrared simulation
-                            val cloudAlpha = (current.cloudCoverPercent / 100f * 0.65f).coerceIn(0.15f, 0.75f)
-                            drawCircle(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        Color(0xFFE2E8F0).copy(alpha = cloudAlpha),
-                                        Color(0xFF94A3B8).copy(alpha = cloudAlpha * 0.5f),
-                                        Color.Transparent
-                                    ),
-                                    center = Offset(center.x + driftX * 0.5f, center.y + driftY * 0.5f),
-                                    radius = maxRadius * 0.9f
-                                ),
-                                center = Offset(center.x + driftX * 0.5f, center.y + driftY * 0.5f),
-                                radius = maxRadius * 0.9f
-                            )
-                        }
-
-                        RadarLayer.WIND_VECTORS -> {
-                            // Wind streamline arrows
-                            val step = 40f * zoomLevel
-                            for (x in (-maxRadius.toInt()..maxRadius.toInt() step step.toInt())) {
-                                for (y in (-maxRadius.toInt()..maxRadius.toInt() step step.toInt())) {
-                                    val pt = Offset(center.x + x, center.y + y)
-                                    if ((pt - center).getDistance() < maxRadius) {
-                                        val len = 14f * zoomLevel
-                                        val endPt = Offset(
-                                            pt.x + (sin(windAngleRad) * len).toFloat(),
-                                            pt.y - (cos(windAngleRad) * len).toFloat()
-                                        )
-                                        drawLine(
-                                            color = Color(0xFF38BDF8).copy(alpha = 0.65f),
-                                            start = pt,
-                                            end = endPt,
-                                            strokeWidth = 1.5.dp.toPx()
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Rotating Radar Sweep Line with phosphor glow
+                    // Draw rotating sweep line
                     val sweepRad = Math.toRadians(sweepAngle.toDouble())
                     val sweepEnd = Offset(
-                        center.x + (cos(sweepRad) * maxRadius).toFloat(),
-                        center.y + (sin(sweepRad) * maxRadius).toFloat()
+                        (center.x + maxRadius * cos(sweepRad)).toFloat(),
+                        (center.y + maxRadius * sin(sweepRad)).toFloat()
                     )
-
                     drawLine(
-                        color = Color(0xFF38BDF8).copy(alpha = 0.85f),
+                        color = Color(0xFF38BDF8).copy(alpha = 0.5f),
                         start = center,
                         end = sweepEnd,
-                        strokeWidth = 2.dp.toPx()
+                        strokeWidth = 1.5.dp.toPx()
                     )
 
-                    // User / Center city location marker
-                    drawCircle(
-                        color = Color(0xFF0284C7),
-                        radius = 6.dp.toPx(),
-                        center = center
+                    // Wind Vector arrow from center
+                    val windRad = Math.toRadians(current.windDirectionDeg - 90.0)
+                    val arrowLen = (current.windSpeedKmh * 1.8 * zoomLevel.toDouble()).coerceIn(20.0, maxRadius.toDouble() * 0.75)
+                    val arrowEnd = Offset(
+                        (center.x + (arrowLen * cos(windRad)).toFloat()),
+                        (center.y + (arrowLen * sin(windRad)).toFloat())
                     )
+                    drawLine(
+                        color = Color(0xFF0284C7),
+                        start = center,
+                        end = arrowEnd,
+                        strokeWidth = 2.5.dp.toPx()
+                    )
+
+                    // Draw city center marker
                     drawCircle(
-                        color = Color.White,
-                        radius = 3.dp.toPx(),
+                        color = Color(0xFF38BDF8),
+                        radius = 4.dp.toPx(),
                         center = center
                     )
                 }
 
-                // Scope Corner HUD Details
+                // Scope Overlay Banner
                 Column(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(10.dp)
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = cityName.uppercase(),
@@ -325,18 +261,54 @@ fun WeatherRadarWidget(
                         )
                     )
                     Text(
-                        text = "Range: 80 km",
+                        text = when (selectedLayer) {
+                            RadarLayer.PRECIPITATION -> if (rainWindow.hasRain) "Forecast Rain: ${rainWindow.peakProbability}% peak" else "NWP Field: Dry (0 mm/h)"
+                            RadarLayer.CLOUDS -> "Cloud Cover: ${current.cloudCoverPercent}%"
+                            RadarLayer.WIND_VECTORS -> "Wind: ${current.windSpeedKmh.toInt()} km/h (${current.windCardinal})"
+                        },
                         style = MaterialTheme.typography.labelSmall.copy(
-                            color = Color(0xFF94A3B8),
+                            color = Color(0xFF38BDF8),
                             fontSize = 10.sp
                         )
                     )
                 }
 
-                // Time slice badge on scope
+                // Station Telemetry Status Banner
                 Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = Color.Black.copy(alpha = 0.65f),
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Black.copy(alpha = 0.75f),
+                    border = BorderStroke(0.5.dp, Color(0xFF64748B)),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 24.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "GROUND DOPPLER TELEMETRY",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = Color(0xFFF59E0B),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 9.sp
+                            )
+                        )
+                        Text(
+                            text = "Regional station feed requires commercial radar integration. Displaying NWP model wind & precipitation vector.",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color(0xFFCBD5E1),
+                                fontSize = 10.sp,
+                                lineHeight = 13.sp
+                            )
+                        )
+                    }
+                }
+
+                // Timestamp pill at top right
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Black.copy(alpha = 0.6f),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(10.dp)
@@ -363,20 +335,20 @@ fun WeatherRadarWidget(
                     }
                 }
 
-                // dBZ Color scale legend at bottom of canvas
+                // Range rings legend at bottom of canvas
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .background(Color.Black.copy(alpha = 0.5f))
+                        .background(Color.Black.copy(alpha = 0.6f))
                         .padding(horizontal = 12.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Light (15 dBZ)", color = Color(0xFF10B981), fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    Text("Moderate (35 dBZ)", color = Color(0xFFF59E0B), fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    Text("Heavy (50 dBZ)", color = Color(0xFFEF4444), fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    Text("Severe (65 dBZ)", color = Color(0xFF8B5CF6), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    Text("25 km", color = Color(0xFF94A3B8), fontSize = 9.sp)
+                    Text("50 km", color = Color(0xFF94A3B8), fontSize = 9.sp)
+                    Text("75 km", color = Color(0xFF94A3B8), fontSize = 9.sp)
+                    Text("100 km Max Range", color = Color(0xFF38BDF8), fontSize = 9.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -400,7 +372,7 @@ fun WeatherRadarWidget(
                     modifier = Modifier.weight(1f).testTag("radar_layer_clouds")
                 )
                 RadarLayerChip(
-                    label = "Wind Stream",
+                    label = "Wind Vector",
                     icon = Icons.Default.Air,
                     isSelected = selectedLayer == RadarLayer.WIND_VECTORS,
                     onClick = { selectedLayer = RadarLayer.WIND_VECTORS },
@@ -447,6 +419,40 @@ fun WeatherRadarWidget(
                 )
             }
         }
+    }
+
+    if (showRoadmapDialog) {
+        AlertDialog(
+            onDismissRequest = { showRoadmapDialog = false },
+            title = {
+                Text("Radar & Satellite Telemetry Roadmap", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Why is ground Doppler radar telemetry not streaming directly?",
+                        style = MaterialTheme.typography.titleSmall.copy(color = Color(0xFF38BDF8))
+                    )
+                    Text(
+                        text = "Live ground Doppler radar relies on terrestrial station networks (e.g. US NEXRAD, UK Met Office, DWD). Free weather APIs like MET Norway provide numerical weather prediction (NWP) model outputs rather than raw radar sweeps.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = "To maintain meteorological integrity, WeatherFlow refuses to fake Doppler echoes with arbitrary canvas blobs.",
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
+                    )
+                    Text(
+                        text = "A production radar tile provider integration (RainViewer / NOAA Open Data) is slated for an upcoming release following commercial licensing verification.",
+                        style = MaterialTheme.typography.bodySmall.copy(color = Color(0xFF94A3B8))
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showRoadmapDialog = false }) {
+                    Text("Understood")
+                }
+            }
+        )
     }
 }
 

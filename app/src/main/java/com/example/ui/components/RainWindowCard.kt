@@ -125,10 +125,9 @@ fun RainWindowCard(
                         )
                     }
 
-                    Divider(
-                        modifier = Modifier
-                            .height(32.dp)
-                            .width(1.dp),
+                    VerticalDivider(
+                        modifier = Modifier.height(32.dp),
+                        thickness = 1.dp,
                         color = Color.White.copy(alpha = 0.15f)
                     )
 
@@ -146,10 +145,9 @@ fun RainWindowCard(
                         )
                     }
 
-                    Divider(
-                        modifier = Modifier
-                            .height(32.dp)
-                            .width(1.dp),
+                    VerticalDivider(
+                        modifier = Modifier.height(32.dp),
+                        thickness = 1.dp,
                         color = Color.White.copy(alpha = 0.15f)
                     )
 

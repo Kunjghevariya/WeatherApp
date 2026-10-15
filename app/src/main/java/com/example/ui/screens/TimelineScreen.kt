@@ -158,7 +158,7 @@ fun TimelineScreen(
                                 )
                             }
 
-                            Divider(color = Color.White.copy(alpha = 0.15f))
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.15f))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -209,12 +209,19 @@ fun TimelineScreen(
                         ) {
                             Icon(imageVector = Icons.Default.WbSunny, contentDescription = "Sunrise", tint = Color(0xFFFBBF24))
                             Column {
-                                Text(text = "Estimated Sunrise", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF94A3B8)))
-                                Text(text = "06:42 AM", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, color = Color.White))
+                                Text(text = "Sunrise", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF94A3B8)))
+                                Text(
+                                    text = weatherData?.astronomy?.sunriseTime ?: "--:--",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, color = Color.White)
+                                )
                             }
                         }
 
-                        Divider(modifier = Modifier.height(30.dp).width(1.dp), color = Color.White.copy(alpha = 0.15f))
+                        VerticalDivider(
+                            modifier = Modifier.height(30.dp),
+                            thickness = 1.dp,
+                            color = Color.White.copy(alpha = 0.15f)
+                        )
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -222,8 +229,11 @@ fun TimelineScreen(
                         ) {
                             Icon(imageVector = Icons.Default.NightsStay, contentDescription = "Sunset", tint = Color(0xFF818CF8))
                             Column {
-                                Text(text = "Estimated Sunset", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF94A3B8)))
-                                Text(text = "06:15 PM", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, color = Color.White))
+                                Text(text = "Sunset", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFF94A3B8)))
+                                Text(
+                                    text = weatherData?.astronomy?.sunsetTime ?: "--:--",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, color = Color.White)
+                                )
                             }
                         }
                     }

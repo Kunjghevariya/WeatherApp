@@ -185,7 +185,7 @@ fun DailyForecastCard(
                     }
 
                     if (idx < dailyList.size - 1) {
-                        Divider(color = Color.White.copy(alpha = 0.08f), thickness = 0.5.dp)
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 0.5.dp)
                     }
                 }
             }

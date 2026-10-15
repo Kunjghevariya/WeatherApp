@@ -100,31 +100,32 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun analyticsCalculator_calculatesAirQualityAccurately() {
-        val current = CurrentWeather(
-            temperatureC = 22.0,
-            feelsLikeC = 22.0,
-            minTempTodayC = 16.0,
-            maxTempTodayC = 25.0,
-            conditionType = WeatherConditionType.CLEAR_DAY,
-            conditionLabel = "Clear Sky",
-            symbolCode = "clearsky_day",
-            humidityPercent = 55,
-            windSpeedKmh = 14.0,
-            windDirectionDeg = 180.0,
-            windCardinal = "S",
-            cloudCoverPercent = 10,
-            uvIndex = 6.0,
-            airPressureHpa = 1016.0,
-            dewPointC = 11.0,
-            nextChangeDescription = "Clear sky continuing"
+    fun analyticsCalculator_evaluatesAirQualityAccuratelyWithRealObservations() {
+        val obs = com.example.data.model.AirQualityCurrentData(
+            time = "2026-10-15T12:00",
+            interval = 3600,
+            usAqi = 42,
+            pm25 = 9.8,
+            pm10 = 16.4,
+            carbonMonoxide = 210.0,
+            nitrogenDioxide = 12.5,
+            ozone = 45.0
         )
 
-        val aq = WeatherAnalyticsCalculator.calculateAirQuality(current, 51.5074)
-        assertTrue("AQI must be positive", aq.aqi in 10..300)
-        assertTrue("Sub-pollutant PM2.5 must be greater than zero", aq.pm25 > 0)
-        assertNotNull("Category must not be null", aq.category)
-        assertTrue("Exercise safety score must be bounded", aq.outdoorExerciseScore in 0..100)
+        val aq = WeatherAnalyticsCalculator.evaluateAirQuality(obs)
+        assertTrue("Air quality must be available", aq.isAvailable)
+        assertEquals(42, aq.aqi)
+        assertEquals("Good", aq.category)
+        assertEquals(9.8, aq.pm25 ?: 0.0, 0.01)
+        assertEquals(16.4, aq.pm10 ?: 0.0, 0.01)
+        assertTrue("Exercise safety score must be high for good AQI", aq.outdoorExerciseScore in 70..100)
+        assertTrue("Data source must be documented", aq.dataSource.contains("Open-Meteo"))
+
+        // When observation feed is unavailable (offline or missing station)
+        val unavailableAq = WeatherAnalyticsCalculator.evaluateAirQuality(null)
+        assertFalse("Must be marked unavailable when observation is null", unavailableAq.isAvailable)
+        assertEquals("Unavailable", unavailableAq.category)
+        assertNull("PM2.5 must not be fabricated when unavailable", unavailableAq.pm25)
     }
 
     @Test
@@ -177,5 +178,111 @@ class ExampleUnitTest {
         val wind = WeatherAnalyticsCalculator.calculateWindDynamics(current, emptyList())
         assertTrue("Gust speed should exceed sustained wind speed", wind.gustSpeedKmh > current.windSpeedKmh)
         assertTrue("Beaufort scale should be positive", wind.beaufortScale >= 4)
+    }
+
+    @Test
+    fun rainPlanner_detectsIntermittentClustersSeparatedByGaps() {
+        val hours = (0..23).map { i ->
+            when (i) {
+                8 -> createHourlyPoint(i, precipProb = 65, precipMm = 1.2, cond = WeatherConditionType.LIGHT_RAIN)
+                20 -> createHourlyPoint(i, precipProb = 75, precipMm = 2.0, cond = WeatherConditionType.HEAVY_RAIN)
+                else -> createHourlyPoint(i, precipProb = 5, precipMm = 0.0)
+            }
+        }
+
+        val window = RainPlanner.calculateRainWindow(hours, "2026-10-15T06:00:00Z")
+        assertTrue("Must detect rain when showers are forecasted", window.hasRain)
+        assertTrue("Must report intermittent showers rather than continuous all-day rain", window.summaryHeadline.contains("Intermittent"))
+        assertTrue("Must include morning shower", window.summaryHeadline.contains("08:00"))
+        assertTrue("Must include evening shower", window.summaryHeadline.contains("20:00"))
+        assertEquals(3.2, window.totalEstimatedMm, 0.01)
+        assertEquals(75, window.peakProbability)
+    }
+
+    @Test
+    fun rainPlanner_handlesSingleIsolatedShower() {
+        val hours = (0..23).map { i ->
+            if (i == 15) createHourlyPoint(i, precipProb = 55, precipMm = 0.8, cond = WeatherConditionType.LIGHT_RAIN)
+            else createHourlyPoint(i, precipProb = 0, precipMm = 0.0)
+        }
+
+        val window = RainPlanner.calculateRainWindow(hours, "2026-10-15T06:00:00Z")
+        assertTrue("Must detect single shower", window.hasRain)
+        assertTrue("Must identify specific hour", window.summaryHeadline.contains("Rain possible around 15:00"))
+    }
+
+    @Test
+    fun rainPlanner_disclosesPartialForecastCoverage() {
+        // Only 6 hours of forecast points available
+        val partialHours = (0..5).map { createHourlyPoint(it, precipProb = 0, precipMm = 0.0) }
+
+        val window = RainPlanner.calculateRainWindow(partialHours, "2026-10-15T06:00:00Z")
+        assertFalse(window.hasRain)
+        assertTrue("Must disclose exact coverage hours in headline", window.summaryHeadline.contains("6 hours"))
+    }
+
+    @Test
+    fun rainPlanner_handlesEmptyDataGracefully() {
+        val window = RainPlanner.calculateRainWindow(emptyList(), "2026-10-15T06:00:00Z")
+        assertFalse(window.hasRain)
+        assertEquals("Forecast unavailable", window.summaryHeadline)
+        assertEquals("--", window.startHour)
+    }
+
+    @Test
+    fun analyticsCalculator_calculatesBarometerTrendFromRealPressureDelta() {
+        val current = CurrentWeather(
+            temperatureC = 20.0,
+            feelsLikeC = 20.0,
+            minTempTodayC = 15.0,
+            maxTempTodayC = 25.0,
+            conditionType = WeatherConditionType.CLEAR_DAY,
+            conditionLabel = "Clear Sky",
+            symbolCode = "clearsky_day",
+            humidityPercent = 50,
+            windSpeedKmh = 10.0,
+            windDirectionDeg = 180.0,
+            windCardinal = "S",
+            cloudCoverPercent = 10,
+            uvIndex = 5.0,
+            airPressureHpa = 1016.0,
+            dewPointC = 10.0,
+            nextChangeDescription = "Steady"
+        )
+
+        // Hour 3 has pressure 1011.0 hPa (drop of 5.0 hPa)
+        val hourly = (0..5).map { i ->
+            val p = if (i == 3) 1011.0 else 1016.0
+            createHourlyPoint(i, pressure = p)
+        }
+
+        val trend = WeatherAnalyticsCalculator.calculateBarometerTrend(current, hourly)
+        assertEquals(-5.0, trend.change3hHpa, 0.01)
+        assertEquals("Falling Rapidly", trend.trendLabel)
+        assertTrue("Implication should warn about incoming low front", trend.shortTermImplication.contains("front") || trend.shortTermImplication.contains("low"))
+    }
+
+    private fun createHourlyPoint(
+        hour: Int,
+        precipProb: Int = 0,
+        precipMm: Double = 0.0,
+        cond: WeatherConditionType = WeatherConditionType.CLEAR_DAY,
+        pressure: Double? = 1013.2
+    ): HourlyPoint {
+        return HourlyPoint(
+            timeIso = "2026-10-15T${String.format(java.util.Locale.US, "%02d", hour)}:00:00Z",
+            hourLabel = "${String.format(java.util.Locale.US, "%02d", hour)}:00",
+            temperatureC = 20.0,
+            conditionType = cond,
+            symbolCode = "clearsky_day",
+            precipProbability = precipProb,
+            precipAmountMm = precipMm,
+            windSpeedKmh = 12.0,
+            windDirectionDeg = 180.0,
+            windCardinal = "S",
+            humidityPercent = 50,
+            isDaylight = hour in 6..19,
+            pressureHpa = pressure
+        )
     }
 }
