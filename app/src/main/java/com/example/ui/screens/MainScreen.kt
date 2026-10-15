@@ -54,6 +54,7 @@ fun NavigationHost(
     onNavigateToTab: (MainTab) -> Unit,
     onOpenSettings: () -> Unit,
     onNavigateToWidgets: () -> Unit,
+    onNavigateToTrustCenter: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -72,7 +73,7 @@ fun NavigationHost(
                     uiState = uiState,
                     viewModel = viewModel,
                     onNavigateToPlaces = { onNavigateToTab(MainTab.PLACES) },
-                    onNavigateToTrustCenter = { onNavigateToTab(MainTab.YOU) },
+                    onNavigateToTrustCenter = onNavigateToTrustCenter,
                     onNavigateToPlanner = { onNavigateToTab(MainTab.PLAN) },
                     onOpenSettings = onOpenSettings,
                     onNavigateToWidgets = onNavigateToWidgets
@@ -97,7 +98,8 @@ fun NavigationHost(
                     viewModel = viewModel,
                     onBack = { onNavigateToTab(MainTab.TODAY) },
                     onNavigateToWidgets = onNavigateToWidgets,
-                    onOpenSettings = onOpenSettings
+                    onOpenSettings = onOpenSettings,
+                    onNavigateToTrustCenter = onNavigateToTrustCenter
                 )
             }
         }
@@ -120,12 +122,15 @@ fun MainScreen(
     var currentTab by remember { mutableStateOf(initialTab) }
     var isSettingsOpen by remember { mutableStateOf(false) }
     var isWidgetsHubOpen by remember { mutableStateOf(false) }
+    var isTrustCenterOpen by remember { mutableStateOf(false) }
 
     // Handle system back navigation:
-    // If in sub-screens (WidgetsHub) close it, or return to TODAY tab from any other tab
-    BackHandler(enabled = isWidgetsHubOpen || currentTab != MainTab.TODAY) {
+    // If in sub-screens (WidgetsHub, TrustCenter) close it, or return to TODAY tab from any other tab
+    BackHandler(enabled = isWidgetsHubOpen || isTrustCenterOpen || currentTab != MainTab.TODAY) {
         if (isWidgetsHubOpen) {
             isWidgetsHubOpen = false
+        } else if (isTrustCenterOpen) {
+            isTrustCenterOpen = false
         } else {
             currentTab = MainTab.TODAY
             onTabSelected(MainTab.TODAY)
@@ -138,7 +143,7 @@ fun MainScreen(
             .windowInsetsPadding(WindowInsets.statusBars),
         containerColor = Color.Transparent,
         bottomBar = {
-            if (!isWidgetsHubOpen) {
+            if (!isWidgetsHubOpen && !isTrustCenterOpen) {
                 NavigationBar(
                     containerColor = Color(0xFF0B1325).copy(alpha = 0.95f),
                     tonalElevation = 6.dp,
@@ -193,6 +198,15 @@ fun MainScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             )
+        } else if (isTrustCenterOpen) {
+            TrustCenterScreen(
+                uiState = uiState,
+                viewModel = viewModel,
+                onBack = { isTrustCenterOpen = false },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
         } else {
             NavigationHost(
                 currentTab = currentTab,
@@ -204,6 +218,7 @@ fun MainScreen(
                 },
                 onOpenSettings = { isSettingsOpen = true },
                 onNavigateToWidgets = { isWidgetsHubOpen = true },
+                onNavigateToTrustCenter = { isTrustCenterOpen = true },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)

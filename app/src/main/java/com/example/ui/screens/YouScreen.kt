@@ -33,6 +33,7 @@ fun YouScreen(
     onBack: () -> Unit,
     onNavigateToWidgets: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onNavigateToTrustCenter: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val weatherData = uiState.weatherData
@@ -662,11 +663,35 @@ fun YouScreen(
 
                         AuditRow(label = "Primary Provider", value = "MET Norway (Meteorologisk Institutt)")
                         AuditRow(label = "Data Product", value = "Locationforecast 2.0 (Compact JSON)")
+                        AuditRow(label = "Air Quality Provider", value = "Open-Meteo Air Quality / Copernicus CAMS")
                         AuditRow(label = "License", value = "Creative Commons BY 4.0")
                         AuditRow(label = "Provider Model Run", value = freshness?.providerUpdatedAtIso ?: "Recent model run")
                         AuditRow(label = "Client Cache Status", value = freshness?.latencyOrAgeText ?: "Live Cache")
                         AuditRow(label = "Active Temperature Scale", value = if (userSettings.tempUnit == "F") "Fahrenheit (°F)" else "Celsius (°C)")
                         AuditRow(label = "Privacy Protection", value = "Coordinates rounded to 4 decimals (~11m)")
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        OutlinedButton(
+                            onClick = onNavigateToTrustCenter,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("btn_open_trust_center"),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF38BDF8).copy(alpha = 0.5f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.VerifiedUser,
+                                contentDescription = null,
+                                tint = Color(0xFF38BDF8),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "View Forecast Trust & Transparency Center",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(4.dp))
 
