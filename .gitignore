@@ -17,3 +17,6 @@ local.properties
 .env
 debug.keystore
 .firebase/
+my-upload-key.jks
+keystore.properties
+*.aab
