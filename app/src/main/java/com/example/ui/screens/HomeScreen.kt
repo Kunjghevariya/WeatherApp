@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
@@ -237,6 +239,46 @@ fun HomeScreen(
                             imageVector = Icons.Default.Tune,
                             contentDescription = "App Settings",
                             tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Share Weather Snapshot
+                    val context = LocalContext.current
+                    IconButton(
+                        onClick = {
+                            val current = weatherData?.current
+                            val temp = if (userSettings.tempUnit == "F") {
+                                "${((current?.temperatureC ?: 0.0) * 9 / 5 + 32).toInt()}°F"
+                            } else {
+                                "${current?.temperatureC?.toInt() ?: 0}°C"
+                            }
+                            val feelsLike = if (userSettings.tempUnit == "F") {
+                                "${((current?.feelsLikeC ?: 0.0) * 9 / 5 + 32).toInt()}°F"
+                            } else {
+                                "${current?.feelsLikeC?.toInt() ?: 0}°C"
+                            }
+                            val city = "${uiState.currentCity.name}, ${uiState.currentCity.country}"
+                            val cond = current?.conditionLabel ?: "Clear Sky"
+                            val aqi = weatherData?.airQuality?.aqi ?: 0
+                            val shareText = "🌤️ Weather in $city: $temp (Feels like $feelsLike), $cond. Air Quality: $aqi US AQI. Real-time atmospheric forecasts via WeatherFlow (O Square Apps):\nhttps://weatherflow-3f663.web.app/"
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, "Share Weather Snapshot")
+                            context.startActivity(shareIntent)
+                        },
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.28f), RoundedCornerShape(20.dp))
+                            .size(40.dp)
+                            .testTag("home_share_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share Weather",
+                            tint = Color(0xFF38BDF8),
                             modifier = Modifier.size(20.dp)
                         )
                     }

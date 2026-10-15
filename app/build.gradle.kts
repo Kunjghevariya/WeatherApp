@@ -17,7 +17,7 @@ android {
     minSdk = 24
     targetSdk = 36
     versionCode = 1
-    versionName = "1.0"
+    versionName = "1.0.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -43,11 +43,15 @@ android {
   buildTypes {
     release {
       isCrunchPngs = false
-      isMinifyEnabled = false
+      isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in
-      // AI Studio.
-      signingConfig = signingConfigs.getByName("release")
+      val uploadKey = file(System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks")
+      signingConfig = if (uploadKey.exists()) {
+        signingConfigs.getByName("release")
+      } else {
+        signingConfigs.getByName("debugConfig")
+      }
     }
     debug {
       // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in
